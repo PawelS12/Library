@@ -22,9 +22,9 @@ int main() {
 
     Library library_1("library.db");
 
-    Book book1(1, "Crime and Punishment", "Fyodor Dostoevsky", crime, 1866, 430, 5);
-    Book book2(2, "Dracula", "Bram Stoker", horror, 1897, 418, 3);
-    Book book3(3, "The Hobbit", "J.R.R. Tolkien", fantasy, 1937, 310, 8);
+    Book book1(1, "Hobbit", "J.R.R Tolkien", fantasy, 1900, 400, 5);
+    Book book2(2, "The Lord of the rings", "J.R.R Tolkien", fantasy, 1901, 1000, 3);
+    Book book3(3, "Eden", "Stanislaw Lem", science_fiction, 1970, 350, 1);
 
     library_1.addBook(book1);
     library_1.addBook(book2);
