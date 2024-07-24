@@ -11,7 +11,7 @@ using std::endl;
 using std::string;
 using std::vector;
 
-int Library::callback(void* data, int argc, char** argv, char** azColName) {
+int Library::callback(void* data, int argc, char** argv, char** azColName) {        // good
     for (int i = 0; i < argc; i++) {
         cout << azColName[i] << ": " << (argv[i] ? argv[i] : "NULL") << endl;
     }
@@ -19,7 +19,7 @@ int Library::callback(void* data, int argc, char** argv, char** azColName) {
     return 0;
 }
 
-int Library::callbackCount(void* data, int argc, char** argv, char** azColName) {
+int Library::callbackCount(void* data, int argc, char** argv, char** azColName) {       // good
     if (argc > 0 && argv[0]) {
         cout << "Count: " << argv[0] << endl; 
     }
@@ -69,7 +69,7 @@ Library::~Library() {
     sqlite3_close(db);
 }
 
-void Library::addBook(const Book& book) {
+void Library::addBook(const Book& book) {                                           // good
     string check_sql = "SELECT COUNT(*) FROM BOOKS WHERE TITLE = ? AND AUTHOR = ? AND KIND = ? AND YEAR = ? AND PAGES = ? AND AMOUNT = ?;";
 
     sqlite3_stmt* stmt;
@@ -121,7 +121,7 @@ void Library::addBook(const Book& book) {
     sqlite3_finalize(stmt);
 }
 
-void Library::borrowBook(const BorrowedBook& borrowedBook) {
+void Library::borrowBook(const BorrowedBook& borrowedBook) {                        // good
     const Book& book = borrowedBook.getBook();
     string select_sql = "SELECT AMOUNT FROM BOOKS WHERE ID = ?;";
 
@@ -273,7 +273,7 @@ void Library::removeBorrowedBook(const string& title, const string& dueDate) {
     sqlite3_finalize(stmt);
 }
 
-void Library::clearDatabase() {
+void Library::clearDatabase() {                                             // good
     string sql = "DELETE FROM BOOKS;";
     char* messageError;
     int exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &messageError);
@@ -283,7 +283,7 @@ void Library::clearDatabase() {
     }
 }
 
-void Library::displayAllBooks() {
+void Library::displayAllBooks() {                                           // good
     cout << "All available books in library: " << endl;
     cout << "----------------------------" << endl;
     string sql = "SELECT * FROM BOOKS;";
@@ -296,7 +296,7 @@ void Library::displayAllBooks() {
     }
 }
 
-void Library::displayBorrowedBooks() {
+void Library::displayBorrowedBooks() {                                      // good
     cout << "All borrowed books: " << endl;
     cout << "----------------------------" << endl;
 
@@ -312,7 +312,7 @@ void Library::displayBorrowedBooks() {
     }
 }
 
-void Library::displayReturnedBooks() {
+void Library::displayReturnedBooks() {                              
     cout << "All returned books: " << endl;
     cout << "----------------------------" << endl;
 
@@ -328,47 +328,47 @@ void Library::displayReturnedBooks() {
     }
 }
 
-void Library::displayBooksByLength() const {
-    cout << "Long books (>400 pages): " << endl;
+void Library::displayBooksByLength() const {                                 // probably good
+    cout << "Long books (>= 400 pages): " << endl;
     string sql = "SELECT * FROM BOOKS WHERE PAGES >= 400;";
     sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
     cout << endl;
-    cout << "Short books (<400 pages): " << endl;
+    cout << "Short books (< 400 pages): " << endl;
     sql = "SELECT * FROM BOOKS WHERE PAGES < 400;";
     sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
 }
 
-void Library::countBooks() const {
+void Library::countBooks() const {                                          // good
     cout << "Number of all books in library: ";
-    string sql = "SELECT COUNT(*) FROM BOOKS;";
+    string sql = "SELECT SUM(AMOUNT) FROM BOOKS;";
     sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
-}
+} 
 
-void Library::searchByTitle(const string& p_title) const {
+void Library::searchByTitle(const string& p_title) const {                  // good
     cout << "Book searched by title: " << p_title << endl;
     string sql = "SELECT * FROM BOOKS WHERE TITLE = '" + p_title + "';";
     sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
 }
 
-void Library::searchByAuthor(const string& p_author) const {
+void Library::searchByAuthor(const string& p_author) const {                // good
     cout << "Books searched by author: " << p_author << endl;
     string sql = "SELECT * FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
     sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
 }
 
-void Library::searchByKind(const Kind& p_kind) const {
+void Library::searchByKind(const Kind& p_kind) const {                      // good
     cout << "Books searched by kind: " << p_kind.getSelectedKind() << endl;
     string sql = "SELECT * FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
     sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
 }
 
-void Library::countByKind(const Kind& p_kind) const {
+void Library::countByKind(const Kind& p_kind) const {                       // good
     cout << "Books counted by kind: " << p_kind.getSelectedKind() << endl;
     string sql = "SELECT COUNT(*) FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
     sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
 }
 
-void Library::countByAuthor(const string& p_author) const {
+void Library::countByAuthor(const string& p_author) const {                 // good
     cout << "Books counted by author: " << p_author << endl;
     string sql = "SELECT COUNT(*) FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
     sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);

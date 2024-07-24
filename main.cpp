@@ -22,22 +22,37 @@ int main() {
 
     Library library_1("library.db");
 
-    Book book1(1, "Crime and Punishment", "Fyodor Dostoevsky", crime, 1866, 430, 5);
-    Book book2(2, "Dracula", "Bram Stoker", horror, 1897, 418, 3);
-    Book book3(3, "The Hobbit", "J.R.R. Tolkien", fantasy, 1937, 310, 8);
+    // Book book1(1, "Hobbit", "J.R.R Tolkien", fantasy, 1900, 400, 5);
+    // Book book2(2, "The Lord of the rings", "J.R.R Tolkien", fantasy, 1901, 1000, 3);
+    // Book book3(3, "Eden", "Stanislaw Lem", science_fiction, 1970, 350, 1);
 
-    library_1.addBook(book1);
-    library_1.addBook(book2);
-    library_1.addBook(book3); 
+    // library_1.addBook(book1);
+    // library_1.addBook(book2);
+    // library_1.addBook(book3); 
 
-    BorrowedBook borrowed_1(1, book1, "2024-07-03", false); 
-    library_1.borrowBook(borrowed_1); 
+    // BorrowedBook borrowed_1(1, book1, "2024-07-03", false); 
+    // library_1.borrowBook(borrowed_1); 
 
-    library_1.displayAllBooks();
-    cout << endl;
-    library_1.displayBorrowedBooks();
-    cout << endl;
-    library_1.displayBooksByLength();
-    
+    // library_1.displayAllBooks();
+    // cout << endl;
+    // library_1.displayBorrowedBooks();
+    // cout << endl;
+    // library_1.displayBooksByLength();
+    // cout << endl;
+    // library_1.countBooks();
+    // cout << endl;
+    // library_1.searchByTitle("Hobbit");
+    // cout << endl;
+    // library_1.searchByAuthor("J.R.R Tolkien");
+    // cout << endl;
+    // library_1.searchByKind(fantasy);
+    // cout << endl;
+    // library_1.countByKind(science_fiction);
+    // cout << endl;
+    // library_1.countByAuthor("Stanislaw Lem");
+    // library_1.clearDatabase();
+    // cout << endl;
+    // library_1.displayAllBooks();
+
     return 0;
 }
