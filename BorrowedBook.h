@@ -4,6 +4,8 @@
 #include <string>
 #include "Book.h"
 
+using std::string;
+
 class BorrowedBook {
 private:
     int id; 
@@ -12,11 +14,11 @@ private:
     bool returned;
 
 public:
-    BorrowedBook(int p_id, const Book& p_book, std::string p_dueDate, bool p_returned);
+    BorrowedBook(int p_id, const Book& p_book, string p_dueDate, bool p_returned);
 
     int getId() const;
     const Book& getBook() const;
-    std::string getDueDate() const;
+    string getDueDate() const;
     bool isReturned() const;
     void markReturned();
     void displayDetails() const;

@@ -5,22 +5,24 @@
 #include <iostream>
 #include "Kind.h"
 
+using std::string;
+
 class Book {
 private:
     int id; 
-    std::string title;
-    std::string author;
+    string title;
+    string author;
     Kind kind;
     int year;
     int pages;
     int amount;
 
 public:
-    Book(int p_id, std::string p_title, std::string p_author, Kind p_kind, int p_year, int p_pages, int p_amount);
+    Book(int p_id, string p_title, string p_author, Kind p_kind, int p_year, int p_pages, int p_amount);
 
     int getId() const;
-    std::string getTitle() const;
-    std::string getAuthor() const;
+    string getTitle() const;
+    string getAuthor() const;
     int getYear() const;
     Kind getKind() const;
     int getPages() const;

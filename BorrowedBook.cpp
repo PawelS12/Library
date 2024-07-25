@@ -1,6 +1,10 @@
 #include "BorrowedBook.h"
 
-BorrowedBook::BorrowedBook(int p_id, const Book& p_book, std::string p_dueDate, bool p_returned)
+using std::cout;
+using std::endl;
+using std::string;
+
+BorrowedBook::BorrowedBook(int p_id, const Book& p_book, string p_dueDate, bool p_returned)
     : id(p_id), book(p_book), due_date(p_dueDate), returned(p_returned) {}
 
 int BorrowedBook::getId() const {
@@ -11,7 +15,7 @@ const Book& BorrowedBook::getBook() const {
     return book;
 }
 
-std::string BorrowedBook::getDueDate() const {
+string BorrowedBook::getDueDate() const {
     return due_date;
 }
 
@@ -25,6 +29,6 @@ void BorrowedBook::markReturned() {
 
 void BorrowedBook::displayDetails() const {
     book.display(); 
-    std::cout << "Due date: " << due_date << std::endl;
-    std::cout << "Returned: " << (returned ? "Yes" : "No") << std::endl;
+    cout << "Due date: " << due_date << endl;
+    cout << "Returned: " << (returned ? "Yes" : "No") << endl;
 }

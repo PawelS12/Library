@@ -12,6 +12,7 @@
                 "${workspaceFolder}/BorrowedBook.cpp",
                 "${workspaceFolder}/Kind.cpp",
                 "${workspaceFolder}/library.cpp",
+                "${workspaceFolder}/DatabaseException.cpp",
                 "-o",
                 "${workspaceFolder}/main.exe",
                 "-L",
