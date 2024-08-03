@@ -16,9 +16,9 @@
                 "-o",
                 "${workspaceFolder}/main.exe",
                 "-L",
-                "C:/mingw/lib",
+                "C:/msys64/mingw64/lib",
                 "-I",
-                "C:/mingw/include",
+                "C:/msys64/mingw64/include",
                 "-lsqlite3"
             ],
             "group": {
