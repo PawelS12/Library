@@ -34,6 +34,7 @@ public:
     void searchByKind(const Kind& p_kind) const;
     void countByKind(const Kind& p_kind) const;
     void countByAuthor(const string& p_author) const;
+    Book getBookByTitle(const string& title) const;
 };
 
 #endif // LIBRARY_H

@@ -122,34 +122,69 @@ void Library::addBook(const Book& book) {
     sqlite3_finalize(stmt);
 }
 
-void Library::borrowBook(const BorrowedBook& borrowedBook) {                        
-    const Book& book = borrowedBook.getBook();
-    string select_sql = "SELECT AMOUNT FROM BOOKS WHERE ID = ?;";
-
+Book Library::getBookByTitle(const string& title) const {
+    string sql = "SELECT * FROM BOOKS WHERE TITLE = ?;";
     sqlite3_stmt* stmt;
-    int exit = sqlite3_prepare_v2(db, select_sql.c_str(), -1, &stmt, NULL);
+    int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
     if (exit != SQLITE_OK) {
         throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
     }
+    sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
 
-    sqlite3_bind_int(stmt, 1, book.getId());
+    Book book; 
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        int id = sqlite3_column_int(stmt, 0);
+        string author = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        int kindType = sqlite3_column_int(stmt, 3);
+        int year = sqlite3_column_int(stmt, 4);
+        int pages = sqlite3_column_int(stmt, 5);
+        int amount = sqlite3_column_int(stmt, 6);
 
+        Kind book_kind = Kind::fromInt(kindType); 
+        book = Book(id, title, author, book_kind, year, pages, amount);
+    } else {
+        sqlite3_finalize(stmt);
+        throw DatabaseException("Book not found.");
+    }
+    sqlite3_finalize(stmt);
+
+    return book;
+}
+
+void Library::borrowBook(const BorrowedBook& borrowedBook) {
+    const Book& book = borrowedBook.getBook();
+    string title = book.getTitle();
+    string dueDate = borrowedBook.getDueDate();
+    bool isReturned = borrowedBook.isReturned();
+
+    Book existingBook = getBookByTitle(title);
+
+    string sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
+    sqlite3_stmt* stmt;
+    int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+    if (exit != SQLITE_OK) {
+        throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
+    }
+    sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
+
+    int bookId = -1;
     int amount = 0;
     if (sqlite3_step(stmt) == SQLITE_ROW) {
-        amount = sqlite3_column_int(stmt, 0);
+        bookId = sqlite3_column_int(stmt, 0);
+        amount = sqlite3_column_int(stmt, 1);
+    } else {
+        sqlite3_finalize(stmt);
+        throw DatabaseException("Book not found.");
     }
-
     sqlite3_finalize(stmt);
 
     if (amount > 0) {
         string update_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT - 1 WHERE ID = ?;";
-
         exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
         if (exit != SQLITE_OK) {
             throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
         }
-
-        sqlite3_bind_int(stmt, 1, book.getId());
+        sqlite3_bind_int(stmt, 1, bookId);
 
         exit = sqlite3_step(stmt);
         if (exit != SQLITE_DONE) {
@@ -157,19 +192,16 @@ void Library::borrowBook(const BorrowedBook& borrowedBook) {
             sqlite3_finalize(stmt);
             throw DatabaseException(errorMsg);
         }
-
         sqlite3_finalize(stmt);
 
         string insert_sql = "INSERT INTO BORROWED_BOOKS (BOOK_ID, DUE_DATE, RETURNED) VALUES (?, ?, ?);";
-
         exit = sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &stmt, NULL);
         if (exit != SQLITE_OK) {
             throw DatabaseException("Error during INSERT statement: " + string(sqlite3_errmsg(db)));
         }
-
-        sqlite3_bind_int(stmt, 1, book.getId());
-        sqlite3_bind_text(stmt, 2, borrowedBook.getDueDate().c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_int(stmt, 3, borrowedBook.isReturned() ? 1 : 0);
+        sqlite3_bind_int(stmt, 1, bookId);
+        sqlite3_bind_text(stmt, 2, dueDate.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 3, isReturned ? 1 : 0);
 
         exit = sqlite3_step(stmt);
         if (exit != SQLITE_DONE) {
@@ -177,7 +209,6 @@ void Library::borrowBook(const BorrowedBook& borrowedBook) {
             sqlite3_finalize(stmt);
             throw DatabaseException(errorMsg);
         }
-
         sqlite3_finalize(stmt);
     } else {
         throw DatabaseException("Book is not available.");
@@ -328,7 +359,7 @@ void Library::displayBorrowedBooks() {
     }
 }
 
-void Library::displayReturnedBooks() {
+void Library::displayReturnedBooks() { //raczej nie potrzebne
     cout << "All returned books: " << endl;
     cout << "----------------------------" << endl;
     

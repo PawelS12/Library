@@ -7,6 +7,8 @@ using std::string;
 Book::Book(int p_id, string p_title, string p_author, Kind p_kind, int p_year, int p_pages, int p_amount)
     : id(p_id), title(p_title), author(p_author), kind(p_kind), year(p_year), pages(p_pages), amount(p_amount) {}
 
+Book::Book() : id(0), title(""), author(""), kind(Kind(Kind::KindType::CRIME)), year(0), pages(0), amount(0) {}
+
 int Book::getId() const {
     return id;
 }

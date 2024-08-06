@@ -19,7 +19,8 @@ private:
 
 public:
     Book(int p_id, string p_title, string p_author, Kind p_kind, int p_year, int p_pages, int p_amount);
-
+    Book();
+    
     int getId() const;
     string getTitle() const;
     string getAuthor() const;

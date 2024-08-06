@@ -15,13 +15,15 @@ public:
 
 private:
     KindType selected_kind;
-    const vector<string> kinds = {"Crime", "Horror", "Fantasy", "Fairy tale", "Reportage", "Contemporary literature", "Romance", "Scientific literature", "Thriller", "Poetry", "Science fiction"};
+    static const vector<string> kinds;
 
 public:
     Kind(KindType kind);
     Kind(const Kind& other);
     Kind& operator=(const Kind& other);
     string getSelectedKind() const;
+    static Kind selectKind();
+    static Kind fromInt(int kindType);
 };
 
 #endif // KIND_H
