@@ -11,19 +11,7 @@ using std::endl;
 
 int main() {
 
-    Library library_1("library.db");
-
-    // Book book1(1, "Hobbit", "J.R.R Tolkien", fantasy, 1900, 400, 5);
-    // Book book2(2, "The Lord of the rings", "J.R.R Tolkien", fantasy, 1901, 1000, 3);
-    // Book book3(3, "Eden", "Stanislaw Lem", science_fiction, 1970, 350, 1);
-
-    // library_1.addBook(book1);
-    // library_1.addBook(book2);
-    // library_1.addBook(book3); 
-
-    // BorrowedBook borrowed_1(1, book1, "2024-07-03", false); 
-    // library_1.borrowBook(borrowed_1); 
-    
+    Library library_1("library.db"); 
     bool is_open = true;
 
     do {
@@ -34,7 +22,7 @@ int main() {
         cout << "3 - Return book." << endl;
         cout << "4 - Remove book from library." << endl;
         cout << "5 - Remove borrowed book." << endl;
-        cout << "6 - Display all books." << endl;
+        cout << "6 - Display all available books." << endl;
         cout << "7 - Display all borrowed books." << endl;
         cout << "8 - Display books by length." << endl;
         cout << "9 - Count all books." << endl;
@@ -105,32 +93,88 @@ int main() {
                 getline(cin, dueDate);
 
                 Book book = library_1.getBookByTitle(title);
-                library_1.returnBook(book.getId());
+                library_1.returnBook(book.getId(), dueDate);
+                cout << "Borrowed book returned successfully." << endl;
             }
                 break;
-            case 4:
+            case 4: {
+                string title;
+                int amount;
+                cout << "Enter title of book to remove: ";
+                getline(cin, title);
 
+                cout << "Enter amount of book to remove: ";
+                cin >> amount;
+
+                library_1.removeBook(title, amount);
+                cout << "Book removed successfully." << endl;
+            }
                 break;
-            case 5:
+            case 5: {
+                string title, dueDate;
+                cout << "Enter title of borrowed book to remove: ";
+                getline(cin, title);
+
+                cout << "Enter due date (YYYY-MM-DD): ";
+                getline(cin, dueDate);
+
+                library_1.removeBorrowedBook(title, dueDate);
+                cout << "Borrowed book removed successfully." << endl;
+            }
                 break;
             case 6:
                 library_1.displayAllBooks();
                 break;
             case 7:
+                library_1.displayBorrowedBooks();
                 break;
             case 8:
+                library_1.displayBooksByLength();
                 break;
             case 9:
+                library_1.countBooks();
                 break;
-            case 10:
+            case 10: {
+                string author;
+                cout << "Enter author of books: ";
+                getline(cin, author);
+                library_1.countByAuthor(author);
+            }
                 break;
-            case 11:
+            case 11: {
+                Kind book_kind = Kind::selectKind();
+                library_1.countByKind(book_kind);
+            }
                 break;
-            case 12:
+            case 12: {
+                string author;
+                cout << "Enter author to search: ";
+                getline(cin, author);
+                library_1.searchByAuthor(author);
+            }
                 break;
-            case 13:
+            case 13: {
+                string title;
+                cout << "Enter title to search: ";
+                getline(cin, title);
+                library_1.searchByTitle(title);
+            }
                 break;
-            case 14:
+            case 14: {
+                Kind book_kind = Kind::selectKind();
+                library_1.searchByKind(book_kind);
+            }
+                break;
+            case 15: {
+                string answer;
+                cout << "Are you sure to clear all data? (yes/no)" << endl;
+                cin >> answer;
+                if (answer == "yes") {
+                    library_1.clearDatabase();
+                } else {
+                    break;
+                }
+            }
                 break;
             case 0:
                 is_open = false;
