@@ -13,15 +13,7 @@ using std::string;
 using std::vector;
 using std::cerr;
 
-int Library::callback(void* data, int argc, char** argv, char** az_col_name) {       
-    for (int i = 0; i < argc; i++) {
-        cout << az_col_name[i] << ": " << (argv[i] ? argv[i] : "NULL") << endl;
-    }
-    cout << "----------------------------" << endl;
-    return 0;
-}
-
-int Library::callbackCount(void* data, int argc, char** argv, char** az_col_name) {       
+int Library::count_callback(void* data, int argc, char** argv, char** az_col_name) {       
     if (argc > 0 && argv[0]) {
         cout << endl << argv[0] << endl; 
     }
@@ -34,6 +26,14 @@ int Library::sort_callback(void* data, int argc, char** argv, char** az_col_name
         cout << "Pages: " << (argv[5] ? argv[5] : "NULL") << endl;
     } else {
         cout << "Unexpected number of columns." << endl;
+    }
+    cout << "----------------------------" << endl;
+    return 0;
+}
+
+int Library::display_callback(void* data, int argc, char** argv, char** az_col_name) {       
+    for (int i = 1; i < argc; i++) {
+        cout << az_col_name[i] << ": " << (argv[i] ? argv[i] : "NULL") << endl;
     }
     cout << "----------------------------" << endl;
     return 0;
@@ -84,7 +84,6 @@ Library::Library(const string& db_name) {
         BEFORE INSERT ON BORROWED_BOOKS
         FOR EACH ROW
         BEGIN
-            -- Sprawdzanie, czy data jest w formacie YYYY-MM-DD
             SELECT
             CASE
                 WHEN LENGTH(NEW.DUE_DATE) != 10 OR
@@ -204,7 +203,7 @@ void Library::addBook(const Book& book) {
             sqlite3_finalize(stmt);
         }
         sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
-        cout << "Book added successfully." << endl;
+        cout << "Book added successfully." << endl << endl;
 
     } catch (const DatabaseException& e) {
         sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
@@ -283,7 +282,7 @@ void Library::borrowBook(const BorrowedBook& borrowed_book) {
         }
 
         sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
-        cout << "Book borrowed successfully." << endl;
+        cout << "Book borrowed successfully." << endl << endl;
 
     } catch (const DatabaseException& e) {
         sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
@@ -349,7 +348,7 @@ void Library::returnBook(int book_id, const string& due_date, const string& emai
         sqlite3_finalize(stmt);
 
         sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
-        cout << "Borrowed book returned successfully." << endl;
+        cout << "Borrowed book returned successfully." << endl << endl;
 
     } catch (const DatabaseException& e) {
         sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
@@ -414,7 +413,7 @@ void Library::removeBook(const string& title, int amount) {
         sqlite3_finalize(stmt);
 
         sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
-        cout << "Book removed successfully." << endl;
+        cout << "Book removed successfully." << endl << endl;
 
     } catch (const DatabaseException& e) {
         sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
@@ -423,29 +422,29 @@ void Library::removeBook(const string& title, int amount) {
     }
 }
 
-void Library::clearDatabase() {
-    string sql = "DELETE FROM BOOKS;";
-    char* message_error;
-    int exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &message_error);
+void Library::sqlExecute(const string& sql, int (*callback)(void*,int,char**,char**)) const {
+    char* message_error = nullptr;
+    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &message_error);
     if (exit != SQLITE_OK) {
-        string error_msg = "Error during database clearing: " + string(message_error);
-        sqlite3_free(message_error);
+        string error_msg = "Error during SQL execution: ";
+        if (message_error) {
+            error_msg += string(message_error);
+            sqlite3_free(message_error); 
+        }
         throw DatabaseException(error_msg);
     }
+}
+
+void Library::clearDatabase() {
+    string sql = "DELETE FROM BOOKS;";
+    sqlExecute(sql, nullptr);  
 }
 
 void Library::displayAllBooks() {
     cout << "All available books in library: " << endl;
     cout << "----------------------------" << endl;
     string sql = "SELECT * FROM BOOKS;";
-    
-    char* message_error;
-    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &message_error);
-    if (exit != SQLITE_OK) {
-        string error_msg = "Error during displaying books: " + string(message_error);
-        sqlite3_free(message_error);
-        throw DatabaseException(error_msg);
-    }
+    sqlExecute(sql, display_callback);
 }
 
 void Library::displayBorrowedBooks() {
@@ -456,68 +455,63 @@ void Library::displayBorrowedBooks() {
                  "INNER JOIN BOOKS BK ON B.BOOK_ID = BK.ID "
                  "WHERE B.RETURNED = 0;";
     
-    char* message_error;
-    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &message_error);
-    if (exit != SQLITE_OK) {
-        string error_msg = "Error during displaying borrowed books: " + string(message_error);
-        sqlite3_free(message_error);
-        throw DatabaseException(error_msg);
-    }
+    sqlExecute(sql, display_callback);
 }
 
 void Library::displayBooksByLength() const {                                 
     cout << "Long books (>= 400 pages): " << endl;
     string sql = "SELECT * FROM BOOKS WHERE PAGES >= 400;";
-    sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
+    sqlExecute(sql, display_callback);
     cout << endl;
+
     cout << "Short books (< 400 pages): " << endl;
     sql = "SELECT * FROM BOOKS WHERE PAGES < 400;";
-    sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
+    sqlExecute(sql, display_callback);
 }
 
 void Library::countBooks() const {                                         
     cout << "Number of all books in library: ";
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS;";
-    sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
+    sqlExecute(sql, count_callback);
 } 
 
 void Library::searchByTitle(const string& p_title) const {                  
     cout << "Book searched by title: " << p_title << endl;
     string sql = "SELECT * FROM BOOKS WHERE TITLE = '" + p_title + "';";
-    sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
+    sqlExecute(sql, display_callback);
 }
 
 void Library::searchByAuthor(const string& p_author) const {               
     cout << "Books searched by author: " << p_author << endl;
     string sql = "SELECT * FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
-    sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
+    sqlExecute(sql, display_callback);
 }
 
 void Library::searchByKind(const Kind& p_kind) const {                    
     cout << "Books searched by kind: " << p_kind.getSelectedKind() << endl;
     string sql = "SELECT * FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
-    sqlite3_exec(db, sql.c_str(), callback, 0, NULL);
+    sqlExecute(sql, display_callback);
 }
 
 void Library::countByKind(const Kind& p_kind) const {                     
     cout << "Books counted by kind: " << p_kind.getSelectedKind();
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
-    sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
+    sqlExecute(sql, count_callback);
 }
 
 void Library::countByAuthor(const string& p_author) const {                
     cout << "Books counted by author: " << p_author;
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
-    sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
+    sqlExecute(sql, count_callback);
 }
 
 void Library::sortByLength(const string& p_choice) const {
     if (p_choice == "ascending") {
         string sql = "SELECT * FROM BOOKS ORDER BY PAGES;";
-        sqlite3_exec(db, sql.c_str(), sort_callback, 0, NULL);
+        sqlExecute(sql, display_callback);
     } else if (p_choice == "descending") {
         string sql = "SELECT * FROM BOOKS ORDER BY PAGES DESC;";
-        sqlite3_exec(db, sql.c_str(), sort_callback, 0, NULL);
+        sqlExecute(sql, display_callback);
     } else {
         cout << "Try again." << endl;
     }

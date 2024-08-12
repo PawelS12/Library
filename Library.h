@@ -12,9 +12,9 @@ using std::string;
 class Library {
 private:
     sqlite3* db;
-    static int callback(void* data, int argc, char** argv, char** az_col_name);
-    static int callbackCount(void* data, int argc, char** argv, char** az_col_name);
+    static int count_callback(void* data, int argc, char** argv, char** az_col_name);
     static int sort_callback(void* data, int argc, char** argv, char** az_col_name);
+    static int display_callback(void* data, int argc, char** argv, char** az_col_name);
 
 public:
     Library(const string& db_name);
@@ -36,6 +36,7 @@ public:
     void countByKind(const Kind& p_kind) const;
     void countByAuthor(const string& p_author) const;
     void sortByLength(const string& p_choice) const;
+    void sqlExecute(const string& sql, int (*callback)(void*,int,char**,char**)) const;
     Book getBookByTitle(const string& title) const;
 };
 
