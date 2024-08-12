@@ -12,17 +12,17 @@ using std::string;
 class Library {
 private:
     sqlite3* db;
-    static int callback(void* data, int argc, char** argv, char** azColName);
-    static int callbackCount(void* data, int argc, char** argv, char** azColName);
+    static int callback(void* data, int argc, char** argv, char** az_col_name);
+    static int callbackCount(void* data, int argc, char** argv, char** az_col_name);
 
 public:
     Library(const string& db_name);
     ~Library();
     void addBook(const Book& book);
-    void borrowBook(const BorrowedBook& borrowedBook);
-    void returnBook(int bookId, const string& dueDate);
+    void borrowBook(const BorrowedBook& borrowed_book);
+    void returnBook(int book_id, const string& due_date);
     void removeBook(const string& title, int amount);
-    void removeBorrowedBook(const string& title, const string& dueDate);
+    void removeBorrowedBook(const string& title, const string& due_date);
     void clearDatabase();
     void displayAllBooks();
     void displayBorrowedBooks();

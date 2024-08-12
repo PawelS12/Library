@@ -6,6 +6,9 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::cin;
+using std::invalid_argument;
+using std::transform;
+using std::tolower;
 
 const vector<string> Kind::kinds = {"Crime", "Horror", "Fantasy", "Fairy tale", "Reportage", "Contemporary literature", "Romance", "Scientific literature", "Thriller", "Poetry", "Science fiction"};
 
@@ -26,7 +29,7 @@ string Kind::getSelectedKind() const {
 
 Kind Kind::fromInt(int kindType) {
     if (kindType < 0 || kindType >= kinds.size()) {
-        throw std::invalid_argument("Invalid kind type");
+        throw invalid_argument("Invalid kind type");
     }
     return Kind(static_cast<KindType>(kindType));
 }
@@ -36,7 +39,7 @@ Kind Kind::selectKind() {
     cout << "Enter the kind of book (crime, horror, fantasy, fairy tale, reportage, contemporary literature, romance, scientific literature, thriller, poetry, sci-fi): ";
     getline(cin, kind_name);
 
-    std::transform(kind_name.begin(), kind_name.end(), kind_name.begin(), [](unsigned char c) { return std::tolower(c); });
+    transform(kind_name.begin(), kind_name.end(), kind_name.begin(), [](unsigned char c) { return tolower(c); });
 
     cout << "Processed kind_name: " << kind_name << endl;
 

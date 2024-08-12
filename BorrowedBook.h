@@ -10,7 +10,7 @@ class BorrowedBook {
 private:
     int id; 
     const Book& book;
-    std::string due_date;
+    string due_date;
     bool returned;
 
 public:

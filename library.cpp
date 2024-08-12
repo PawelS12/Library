@@ -11,18 +11,19 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::cerr;
 
-int Library::callback(void* data, int argc, char** argv, char** azColName) {       
+int Library::callback(void* data, int argc, char** argv, char** az_col_name) {       
     for (int i = 0; i < argc; i++) {
-        cout << azColName[i] << ": " << (argv[i] ? argv[i] : "NULL") << endl;
+        cout << az_col_name[i] << ": " << (argv[i] ? argv[i] : "NULL") << endl;
     }
     cout << "----------------------------" << endl;
     return 0;
 }
 
-int Library::callbackCount(void* data, int argc, char** argv, char** azColName) {       
+int Library::callbackCount(void* data, int argc, char** argv, char** az_col_name) {       
     if (argc > 0 && argv[0]) {
-        cout << "Count: " << argv[0] << endl; 
+        cout << argv[0] << endl; 
     }
     return 0;
 }
@@ -43,12 +44,12 @@ Library::Library(const string& db_name) {
                  "AMOUNT INTEGER NOT NULL"
                  ");";
 
-    char* messageError;
-    exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &messageError);
+    char* message_error;
+    exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &message_error);
     if (exit != SQLITE_OK) {
-        string errorMsg = "Error create table (books): " + string(messageError);
-        sqlite3_free(messageError);
-        throw DatabaseException(errorMsg);
+        string error_msg = "Error create table (books): " + string(message_error);
+        sqlite3_free(message_error);
+        throw DatabaseException(error_msg);
     }
 
     sql = "CREATE TABLE IF NOT EXISTS BORROWED_BOOKS ("
@@ -59,106 +60,40 @@ Library::Library(const string& db_name) {
           "FOREIGN KEY (BOOK_ID) REFERENCES BOOKS(ID)"
           ");";
 
-    exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &messageError);
+    exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &message_error);
     if (exit != SQLITE_OK) {
-        string errorMsg = "Error create table (borrowed_books): " + string(messageError);
-        sqlite3_free(messageError);
-        throw DatabaseException(errorMsg);
+        string error_msg = "Error create table (borrowed_books): " + string(message_error);
+        sqlite3_free(message_error);
+        throw DatabaseException(error_msg);
     }
 
-    string triggerSql = R"(
+    string trigger_sql = R"(
         CREATE TRIGGER IF NOT EXISTS check_due_date
         BEFORE INSERT ON BORROWED_BOOKS
         FOR EACH ROW
         BEGIN
-            -- Check if the DUE_DATE is between January 1, 2024 and December 31, 2026
+            -- Sprawdzanie, czy data jest w formacie YYYY-MM-DD
             SELECT
-                CASE
-                    WHEN NEW.DUE_DATE < '2024-01-01' OR NEW.DUE_DATE > '2026-12-31' THEN
-                        RAISE (ABORT, 'DUE_DATE must be between 2024-01-01 and 2026-12-31')
-                END;
+            CASE
+                WHEN LENGTH(NEW.DUE_DATE) != 10 OR
+                    SUBSTR(NEW.DUE_DATE, 5, 1) != '-' OR
+                    SUBSTR(NEW.DUE_DATE, 8, 1) != '-' OR
+                    NOT (NEW.DUE_DATE BETWEEN '2024-01-01' AND '2026-12-31') THEN
+                    RAISE (ABORT, 'DUE_DATE must be in the format YYYY-MM-DD and between 2024-01-01 and 2026-12-31')
+            END;
         END;
     )";
 
-    exit = sqlite3_exec(db, triggerSql.c_str(), NULL, 0, &messageError);
+    exit = sqlite3_exec(db, trigger_sql.c_str(), NULL, 0, &message_error);
     if (exit != SQLITE_OK) {
-        string errorMsg = "Error create trigger (check_due_date): " + string(messageError);
-        sqlite3_free(messageError);
-        throw DatabaseException(errorMsg);
+        string error_msg = "Error create trigger (check_due_date): " + string(message_error);
+        sqlite3_free(message_error);
+        throw DatabaseException(error_msg);
     } 
 }
 
 Library::~Library() {
     sqlite3_close(db);
-}
-
-void Library::addBook(const Book& book) {                                           
-    string check_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ? AND AUTHOR = ? AND KIND = ? AND YEAR = ? AND PAGES = ?;";
-    
-    sqlite3_stmt* stmt;
-    int exit = sqlite3_prepare_v2(db, check_sql.c_str(), -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
-    }
-
-    sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, book.getKind().getSelectedKind().c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_int(stmt, 4, book.getYear());
-    sqlite3_bind_int(stmt, 5, book.getPages());
-
-    int bookId = -1;
-    int currentAmount = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        bookId = sqlite3_column_int(stmt, 0);
-        currentAmount = sqlite3_column_int(stmt, 1);
-    }
-
-    sqlite3_finalize(stmt);
-
-    if (bookId != -1) {
-        string update_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT + ? WHERE ID = ?;";
-        
-        exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
-        if (exit != SQLITE_OK) {
-            throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
-        }
-        
-        sqlite3_bind_int(stmt, 1, book.getAmount());
-        sqlite3_bind_int(stmt, 2, bookId);
-
-        exit = sqlite3_step(stmt);
-        if (exit != SQLITE_DONE) {
-            string errorMsg = "Error during step UPDATE: " + string(sqlite3_errmsg(db));
-            sqlite3_finalize(stmt);
-            throw DatabaseException(errorMsg);
-        }
-
-        sqlite3_finalize(stmt);
-    } else {
-        string insert_sql = "INSERT INTO BOOKS (TITLE, AUTHOR, KIND, YEAR, PAGES, AMOUNT) VALUES (?, ?, ?, ?, ?, ?);";
-        
-        exit = sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &stmt, NULL);
-        if (exit != SQLITE_OK) {
-            throw DatabaseException("Error during INSERT prepare statement: " + string(sqlite3_errmsg(db)));
-        }
-
-        sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 3, book.getKind().getSelectedKind().c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_int(stmt, 4, book.getYear());
-        sqlite3_bind_int(stmt, 5, book.getPages());
-        sqlite3_bind_int(stmt, 6, book.getAmount());
-
-        exit = sqlite3_step(stmt);
-        if (exit != SQLITE_DONE) {
-            string errorMsg = "Error during step INSERT: " + string(sqlite3_errmsg(db));
-            sqlite3_finalize(stmt);
-            throw DatabaseException(errorMsg);
-        }
-
-        sqlite3_finalize(stmt);
-    }
 }
 
 Book Library::getBookByTitle(const string& title) const {
@@ -191,210 +126,297 @@ Book Library::getBookByTitle(const string& title) const {
     return book;
 }
 
-void Library::borrowBook(const BorrowedBook& borrowedBook) {
-    const Book& book = borrowedBook.getBook();
-    string title = book.getTitle();
-    string dueDate = borrowedBook.getDueDate();
-    bool isReturned = borrowedBook.isReturned();
+void Library::addBook(const Book& book) {
+    sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 
-    Book existingBook = getBookByTitle(title);
+    try {
+        string check_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ? AND AUTHOR = ? AND KIND = ? AND YEAR = ? AND PAGES = ?;";
+        sqlite3_stmt* stmt;
+        int exit = sqlite3_prepare_v2(db, check_sql.c_str(), -1, &stmt, NULL);
+        if (exit != SQLITE_OK) {
+            throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
+        }
 
-    string sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
-    sqlite3_stmt* stmt;
-    int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
-    }
-    sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, book.getKind().getSelectedKind().c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_int(stmt, 4, book.getYear());
+        sqlite3_bind_int(stmt, 5, book.getPages());
 
-    int bookId = -1;
-    int amount = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        bookId = sqlite3_column_int(stmt, 0);
-        amount = sqlite3_column_int(stmt, 1);
-    } else {
+        int book_id = -1;
+        int current_amount = 0;
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            book_id = sqlite3_column_int(stmt, 0);
+            current_amount = sqlite3_column_int(stmt, 1);
+        }
+
         sqlite3_finalize(stmt);
-        throw DatabaseException("Book not found.");
-    }
-    sqlite3_finalize(stmt);
 
-    if (amount > 0) {
-        string update_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT - 1 WHERE ID = ?;";
+        if (book_id != -1) {
+            string update_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT + ? WHERE ID = ?;";
+            
+            exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
+            if (exit != SQLITE_OK) {
+                throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
+            }
+            
+            sqlite3_bind_int(stmt, 1, book.getAmount());
+            sqlite3_bind_int(stmt, 2, book_id);
+
+            exit = sqlite3_step(stmt);
+            if (exit != SQLITE_DONE) {
+                throw DatabaseException("Error during step UPDATE: " + string(sqlite3_errmsg(db)));
+            }
+
+            sqlite3_finalize(stmt);
+        } else {
+            string insert_sql = "INSERT INTO BOOKS (TITLE, AUTHOR, KIND, YEAR, PAGES, AMOUNT) VALUES (?, ?, ?, ?, ?, ?);";
+            
+            exit = sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &stmt, NULL);
+            if (exit != SQLITE_OK) {
+                throw DatabaseException("Error during INSERT prepare statement: " + string(sqlite3_errmsg(db)));
+            }
+
+            sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_text(stmt, 3, book.getKind().getSelectedKind().c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_int(stmt, 4, book.getYear());
+            sqlite3_bind_int(stmt, 5, book.getPages());
+            sqlite3_bind_int(stmt, 6, book.getAmount());
+
+            exit = sqlite3_step(stmt);
+            if (exit != SQLITE_DONE) {
+                throw DatabaseException("Error during step INSERT: " + string(sqlite3_errmsg(db)));
+            }
+
+            sqlite3_finalize(stmt);
+        }
+        sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+        cout << "Book added successfully." << endl;
+
+    } catch (const DatabaseException& e) {
+        sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+        cerr << "Failed to add book: " << e.what() << endl;
+        throw; 
+    }
+}
+
+void Library::borrowBook(const BorrowedBook& borrowed_book) {
+    const Book& book = borrowed_book.getBook();
+    string title = book.getTitle();
+    string due_date = borrowed_book.getDueDate();
+    bool is_returned = borrowed_book.isReturned();
+
+    sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+
+    try {
+        Book existingBook = getBookByTitle(title);
+
+        string sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
+        sqlite3_stmt* stmt;
+        int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
+        if (exit != SQLITE_OK) {
+            throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
+        }
+        sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
+
+        int book_id = -1;
+        int amount = 0;
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            book_id = sqlite3_column_int(stmt, 0);
+            amount = sqlite3_column_int(stmt, 1);
+        } else {
+            sqlite3_finalize(stmt);
+            throw DatabaseException("Book not found.");
+        }
+        sqlite3_finalize(stmt);
+
+        if (amount > 0) {
+            string update_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT - 1 WHERE ID = ?;";
+            exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
+            if (exit != SQLITE_OK) {
+                throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
+            }
+            sqlite3_bind_int(stmt, 1, book_id);
+
+            exit = sqlite3_step(stmt);
+            if (exit != SQLITE_DONE) {
+                string error_msg = "Error during step UPDATE: " + string(sqlite3_errmsg(db));
+                sqlite3_finalize(stmt);
+                throw DatabaseException(error_msg);
+            }
+            sqlite3_finalize(stmt);
+
+            string insert_sql = "INSERT INTO BORROWED_BOOKS (BOOK_ID, DUE_DATE, RETURNED) VALUES (?, ?, ?);";
+            exit = sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &stmt, NULL);
+            if (exit != SQLITE_OK) {
+                throw DatabaseException("Error during INSERT statement: " + string(sqlite3_errmsg(db)));
+            }
+            sqlite3_bind_int(stmt, 1, book_id);
+            sqlite3_bind_text(stmt, 2, due_date.c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_int(stmt, 3, is_returned ? 1 : 0);
+
+            exit = sqlite3_step(stmt);
+            if (exit != SQLITE_DONE) {
+                string error_msg = "Error during step INSERT: " + string(sqlite3_errmsg(db));
+                sqlite3_finalize(stmt);
+                throw DatabaseException(error_msg);
+            }
+            sqlite3_finalize(stmt);
+
+            sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+        } else {
+            throw DatabaseException("Book is not available.");
+        }
+
+        sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+        cout << "Book borrowed successfully." << endl;
+
+    } catch (const DatabaseException& e) {
+        sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+        cerr << "Failed to borrow book: " << e.what() << endl;
+        throw; 
+    }
+}
+
+void Library::returnBook(int book_id, const string& due_date) {
+    sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
+
+    try {
+        string select_sql = "SELECT ID FROM BORROWED_BOOKS WHERE BOOK_ID = ? AND DUE_DATE = ? AND RETURNED = 0;";
+        
+        sqlite3_stmt* stmt;
+        int exit = sqlite3_prepare_v2(db, select_sql.c_str(), -1, &stmt, NULL);
+        if (exit != SQLITE_OK) {
+            throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
+        }
+        
+        sqlite3_bind_int(stmt, 1, book_id);
+        sqlite3_bind_text(stmt, 2, due_date.c_str(), -1, SQLITE_STATIC);
+        
+        int borrowed_book_id = -1;
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            borrowed_book_id = sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+        
+        if (borrowed_book_id == -1) {
+            throw DatabaseException("No borrowed book found with the provided details.");
+        }
+        
+        string update_sql = "UPDATE BORROWED_BOOKS SET RETURNED = 1 WHERE ID = ?;";
         exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
         if (exit != SQLITE_OK) {
             throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
         }
-        sqlite3_bind_int(stmt, 1, bookId);
-
+        
+        sqlite3_bind_int(stmt, 1, borrowed_book_id);
+        
         exit = sqlite3_step(stmt);
         if (exit != SQLITE_DONE) {
-            string errorMsg = "Error during step UPDATE: " + string(sqlite3_errmsg(db));
-            sqlite3_finalize(stmt);
-            throw DatabaseException(errorMsg);
+            throw DatabaseException("Error during step UPDATE: " + string(sqlite3_errmsg(db)));
         }
         sqlite3_finalize(stmt);
-
-        string insert_sql = "INSERT INTO BORROWED_BOOKS (BOOK_ID, DUE_DATE, RETURNED) VALUES (?, ?, ?);";
-        exit = sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &stmt, NULL);
+        
+        string update_amount_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT + 1 WHERE ID = ?;";
+        
+        exit = sqlite3_prepare_v2(db, update_amount_sql.c_str(), -1, &stmt, NULL);
         if (exit != SQLITE_OK) {
-            throw DatabaseException("Error during INSERT statement: " + string(sqlite3_errmsg(db)));
+            throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
         }
-        sqlite3_bind_int(stmt, 1, bookId);
-        sqlite3_bind_text(stmt, 2, dueDate.c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_int(stmt, 3, isReturned ? 1 : 0);
-
+        
+        sqlite3_bind_int(stmt, 1, book_id);
+        
         exit = sqlite3_step(stmt);
         if (exit != SQLITE_DONE) {
-            string errorMsg = "Error during step INSERT: " + string(sqlite3_errmsg(db));
-            sqlite3_finalize(stmt);
-            throw DatabaseException(errorMsg);
+            throw DatabaseException("Error during step UPDATE: " + string(sqlite3_errmsg(db)));
         }
+        
         sqlite3_finalize(stmt);
-    } else {
-        throw DatabaseException("Book is not available.");
-    }
-}
 
-void Library::returnBook(int bookId, const string& dueDate) {
-    string select_sql = "SELECT ID FROM BORROWED_BOOKS WHERE BOOK_ID = ? AND DUE_DATE = ? AND RETURNED = 0;";
-    
-    sqlite3_stmt* stmt;
-    int exit = sqlite3_prepare_v2(db, select_sql.c_str(), -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
+        sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+        cout << "Borrowed book returned successfully." << endl;
+
+    } catch (const DatabaseException& e) {
+        sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+        cerr << "Failed to return book: " << e.what() << endl;
+        throw; 
     }
-    
-    sqlite3_bind_int(stmt, 1, bookId);
-    sqlite3_bind_text(stmt, 2, dueDate.c_str(), -1, SQLITE_STATIC);
-    
-    int borrowedBookId = -1;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        borrowedBookId = sqlite3_column_int(stmt, 0);
-    }
-    sqlite3_finalize(stmt);
-    
-    if (borrowedBookId == -1) {
-        throw DatabaseException("No borrowed book found with the provided details.");
-    }
-    
-    string update_sql = "UPDATE BORROWED_BOOKS SET RETURNED = 1 WHERE ID = ?;";
-    exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
-    }
-    
-    sqlite3_bind_int(stmt, 1, borrowedBookId);
-    
-    exit = sqlite3_step(stmt);
-    if (exit != SQLITE_DONE) {
-        string errorMsg = "Error during step UPDATE: " + string(sqlite3_errmsg(db));
-        sqlite3_finalize(stmt);
-        throw DatabaseException(errorMsg);
-    }
-    sqlite3_finalize(stmt);
-    
-    string update_amount_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT + 1 WHERE ID = ?;";
-    
-    exit = sqlite3_prepare_v2(db, update_amount_sql.c_str(), -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
-    }
-    
-    sqlite3_bind_int(stmt, 1, bookId);
-    
-    exit = sqlite3_step(stmt);
-    if (exit != SQLITE_DONE) {
-        string errorMsg = "Error during step UPDATE: " + string(sqlite3_errmsg(db));
-        sqlite3_finalize(stmt);
-        throw DatabaseException(errorMsg);
-    }
-    
-    sqlite3_finalize(stmt);
 }
 
 void Library::removeBook(const string& title, int amount) {
-    string select_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
-    
-    sqlite3_stmt* stmt;
-    int exit = sqlite3_prepare_v2(db, select_sql.c_str(), -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
-    }
+    sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 
-    sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
-
-    int bookId = -1;
-    int currentAmount = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        bookId = sqlite3_column_int(stmt, 0);
-        currentAmount = sqlite3_column_int(stmt, 1);
-    } else {
-        sqlite3_finalize(stmt);
-        throw DatabaseException("Book not found.");
-    }
-    sqlite3_finalize(stmt);
-
-    if (currentAmount < amount) {
-        throw DatabaseException("Not enough books to remove.");
-    }
-
-    if (currentAmount == amount) {
-        string delete_sql = "DELETE FROM BOOKS WHERE ID = ?;";
-        exit = sqlite3_prepare_v2(db, delete_sql.c_str(), -1, &stmt, NULL);
+    try {
+        string select_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
+        
+        sqlite3_stmt* stmt;
+        int exit = sqlite3_prepare_v2(db, select_sql.c_str(), -1, &stmt, NULL);
         if (exit != SQLITE_OK) {
-            throw DatabaseException("Error during DELETE statement: " + string(sqlite3_errmsg(db)));
+            throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
         }
-        sqlite3_bind_int(stmt, 1, bookId);
-    } else {
-        string update_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT - ? WHERE ID = ?;";
-        exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
-        if (exit != SQLITE_OK) {
-            throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
+
+        sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
+
+        int book_id = -1;
+        int current_amount = 0;
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            book_id = sqlite3_column_int(stmt, 0);
+            current_amount = sqlite3_column_int(stmt, 1);
+        } else {
+            sqlite3_finalize(stmt);
+            throw DatabaseException("Book not found.");
         }
-        sqlite3_bind_int(stmt, 1, amount);
-        sqlite3_bind_int(stmt, 2, bookId);
-    }
-
-    exit = sqlite3_step(stmt);
-    if (exit != SQLITE_DONE) {
-        string errorMsg = "Error during step DELETE/UPDATE: " + string(sqlite3_errmsg(db));
         sqlite3_finalize(stmt);
-        throw DatabaseException(errorMsg);
-    }
 
-    sqlite3_finalize(stmt);
-}
+        if (current_amount < amount) {
+            throw DatabaseException("Not enough books to remove.");
+        }
 
-void Library::removeBorrowedBook(const string& title, const string& dueDate) {
-    string sql = "DELETE FROM BORROWED_BOOKS WHERE BOOK_ID IN (SELECT ID FROM BOOKS WHERE TITLE = ?) AND DUE_DATE = ?;";
-    
-    sqlite3_stmt* stmt;
-    int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
-    if (exit != SQLITE_OK) {
-        throw DatabaseException("Error DELETE statement: " + string(sqlite3_errmsg(db)));
-    }
-    
-    sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, dueDate.c_str(), -1, SQLITE_STATIC);
-    
-    exit = sqlite3_step(stmt);
-    if (exit != SQLITE_DONE) {
-        string errorMsg = "Error step DELETE: " + string(sqlite3_errmsg(db));
+        if (current_amount == amount) {
+            string delete_sql = "DELETE FROM BOOKS WHERE ID = ?;";
+            exit = sqlite3_prepare_v2(db, delete_sql.c_str(), -1, &stmt, NULL);
+            if (exit != SQLITE_OK) {
+                throw DatabaseException("Error during DELETE statement: " + string(sqlite3_errmsg(db)));
+            }
+            sqlite3_bind_int(stmt, 1, book_id);
+        } else {
+            string update_sql = "UPDATE BOOKS SET AMOUNT = AMOUNT - ? WHERE ID = ?;";
+            exit = sqlite3_prepare_v2(db, update_sql.c_str(), -1, &stmt, NULL);
+            if (exit != SQLITE_OK) {
+                throw DatabaseException("Error during UPDATE statement: " + string(sqlite3_errmsg(db)));
+            }
+            sqlite3_bind_int(stmt, 1, amount);
+            sqlite3_bind_int(stmt, 2, book_id);
+        }
+
+        exit = sqlite3_step(stmt);
+        if (exit != SQLITE_DONE) {
+            string error_msg = "Error during step DELETE/UPDATE: " + string(sqlite3_errmsg(db));
+            sqlite3_finalize(stmt);
+            throw DatabaseException(error_msg);
+        }
+
         sqlite3_finalize(stmt);
-        throw DatabaseException(errorMsg);
+
+        sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
+        cout << "Book removed successfully." << endl;
+
+    } catch (const DatabaseException& e) {
+        sqlite3_exec(db, "ROLLBACK;", nullptr, nullptr, nullptr);
+        cerr << "Failed to remove book: " << e.what() << endl;
+        throw; 
     }
-    
-    sqlite3_finalize(stmt);
 }
 
 void Library::clearDatabase() {
     string sql = "DELETE FROM BOOKS;";
-    char* messageError;
-    int exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &messageError);
+    char* message_error;
+    int exit = sqlite3_exec(db, sql.c_str(), NULL, 0, &message_error);
     if (exit != SQLITE_OK) {
-        string errorMsg = "Error during database clearing: " + string(messageError);
-        sqlite3_free(messageError);
-        throw DatabaseException(errorMsg);
+        string error_msg = "Error during database clearing: " + string(message_error);
+        sqlite3_free(message_error);
+        throw DatabaseException(error_msg);
     }
 }
 
@@ -403,12 +425,12 @@ void Library::displayAllBooks() {
     cout << "----------------------------" << endl;
     string sql = "SELECT * FROM BOOKS;";
     
-    char* messageError;
-    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &messageError);
+    char* message_error;
+    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &message_error);
     if (exit != SQLITE_OK) {
-        string errorMsg = "Error during displaying books: " + string(messageError);
-        sqlite3_free(messageError);
-        throw DatabaseException(errorMsg);
+        string error_msg = "Error during displaying books: " + string(message_error);
+        sqlite3_free(message_error);
+        throw DatabaseException(error_msg);
     }
 }
 
@@ -420,29 +442,12 @@ void Library::displayBorrowedBooks() {
                     "INNER JOIN BOOKS BK ON B.BOOK_ID = BK.ID "
                     "WHERE B.RETURNED = 0;";
     
-    char* messageError;
-    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &messageError);
+    char* message_error;
+    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &message_error);
     if (exit != SQLITE_OK) {
-        string errorMsg = "Error during displaying borrowed books: " + string(messageError);
-        sqlite3_free(messageError);
-        throw DatabaseException(errorMsg);
-    }
-}
-
-void Library::displayReturnedBooks() { //raczej nie potrzebne
-    cout << "All returned books: " << endl;
-    cout << "----------------------------" << endl;
-    
-    string sql = "SELECT B.ID, BK.TITLE, BK.AUTHOR, BK.YEAR, BK.PAGES, B.DUE_DATE FROM BORROWED_BOOKS B "
-                    "INNER JOIN BOOKS BK ON B.BOOK_ID = BK.ID "
-                    "WHERE B.RETURNED = 1;";
-    
-    char* messageError;
-    int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &messageError);
-    if (exit != SQLITE_OK) {
-        string errorMsg = "Error during displaying returned books: " + string(messageError);
-        sqlite3_free(messageError);
-        throw DatabaseException(errorMsg);
+        string error_msg = "Error during displaying borrowed books: " + string(message_error);
+        sqlite3_free(message_error);
+        throw DatabaseException(error_msg);
     }
 }
 
@@ -481,13 +486,13 @@ void Library::searchByKind(const Kind& p_kind) const {
 }
 
 void Library::countByKind(const Kind& p_kind) const {                     
-    cout << "Books counted by kind: " << p_kind.getSelectedKind() << endl;
-    string sql = "SELECT COUNT(*) FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
+    cout << "Books counted by kind: " << p_kind.getSelectedKind();
+    string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
     sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
 }
 
 void Library::countByAuthor(const string& p_author) const {                
-    cout << "Books counted by author: " << p_author << endl;
-    string sql = "SELECT COUNT(*) FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
+    cout << "Books counted by author: " << p_author;
+    string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
     sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
 } 
