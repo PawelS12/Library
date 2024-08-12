@@ -20,7 +20,7 @@ public:
     ~Library();
     void addBook(const Book& book);
     void borrowBook(const BorrowedBook& borrowed_book);
-    void returnBook(int book_id, const string& due_date);
+    void returnBook(int book_id, const string& due_date, const string& email);
     void removeBook(const string& title, int amount);
     void removeBorrowedBook(const string& title, const string& due_date);
     void clearDatabase();

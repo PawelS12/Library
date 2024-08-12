@@ -23,7 +23,7 @@ int Library::callback(void* data, int argc, char** argv, char** az_col_name) {
 
 int Library::callbackCount(void* data, int argc, char** argv, char** az_col_name) {       
     if (argc > 0 && argv[0]) {
-        cout << argv[0] << endl; 
+        cout << endl << argv[0] << endl; 
     }
     return 0;
 }
@@ -56,6 +56,7 @@ Library::Library(const string& db_name) {
           "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
           "BOOK_ID INTEGER NOT NULL, "
           "DUE_DATE DATE NOT NULL, "
+          "EMAIL TEXT NOT NULL,"
           "RETURNED INTEGER DEFAULT 0, "
           "FOREIGN KEY (BOOK_ID) REFERENCES BOOKS(ID)"
           ");";
@@ -205,12 +206,13 @@ void Library::borrowBook(const BorrowedBook& borrowed_book) {
     const Book& book = borrowed_book.getBook();
     string title = book.getTitle();
     string due_date = borrowed_book.getDueDate();
+    string email = borrowed_book.getEmail();
     bool is_returned = borrowed_book.isReturned();
 
     sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 
     try {
-        Book existingBook = getBookByTitle(title);
+        Book existing_book = getBookByTitle(title);
 
         string sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
         sqlite3_stmt* stmt;
@@ -247,14 +249,15 @@ void Library::borrowBook(const BorrowedBook& borrowed_book) {
             }
             sqlite3_finalize(stmt);
 
-            string insert_sql = "INSERT INTO BORROWED_BOOKS (BOOK_ID, DUE_DATE, RETURNED) VALUES (?, ?, ?);";
+            string insert_sql = "INSERT INTO BORROWED_BOOKS (BOOK_ID, DUE_DATE, EMAIL, RETURNED) VALUES (?, ?, ?, ?);";
             exit = sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &stmt, NULL);
             if (exit != SQLITE_OK) {
                 throw DatabaseException("Error during INSERT statement: " + string(sqlite3_errmsg(db)));
             }
             sqlite3_bind_int(stmt, 1, book_id);
             sqlite3_bind_text(stmt, 2, due_date.c_str(), -1, SQLITE_STATIC);
-            sqlite3_bind_int(stmt, 3, is_returned ? 1 : 0);
+            sqlite3_bind_text(stmt, 3, email.c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_int(stmt, 4, is_returned ? 1 : 0);
 
             exit = sqlite3_step(stmt);
             if (exit != SQLITE_DONE) {
@@ -264,7 +267,6 @@ void Library::borrowBook(const BorrowedBook& borrowed_book) {
             }
             sqlite3_finalize(stmt);
 
-            sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
         } else {
             throw DatabaseException("Book is not available.");
         }
@@ -279,11 +281,11 @@ void Library::borrowBook(const BorrowedBook& borrowed_book) {
     }
 }
 
-void Library::returnBook(int book_id, const string& due_date) {
+void Library::returnBook(int book_id, const string& due_date, const string& email) {
     sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 
     try {
-        string select_sql = "SELECT ID FROM BORROWED_BOOKS WHERE BOOK_ID = ? AND DUE_DATE = ? AND RETURNED = 0;";
+        string select_sql = "SELECT ID FROM BORROWED_BOOKS WHERE BOOK_ID = ? AND DUE_DATE = ? AND EMAIL = ? AND RETURNED = 0;";
         
         sqlite3_stmt* stmt;
         int exit = sqlite3_prepare_v2(db, select_sql.c_str(), -1, &stmt, NULL);
@@ -293,6 +295,7 @@ void Library::returnBook(int book_id, const string& due_date) {
         
         sqlite3_bind_int(stmt, 1, book_id);
         sqlite3_bind_text(stmt, 2, due_date.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, email.c_str(), -1, SQLITE_STATIC);
         
         int borrowed_book_id = -1;
         if (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -438,9 +441,9 @@ void Library::displayBorrowedBooks() {
     cout << "All borrowed books: " << endl;
     cout << "----------------------------" << endl;
     
-    string sql = "SELECT B.ID, BK.TITLE, BK.AUTHOR, BK.YEAR, BK.PAGES, B.DUE_DATE FROM BORROWED_BOOKS B "
-                    "INNER JOIN BOOKS BK ON B.BOOK_ID = BK.ID "
-                    "WHERE B.RETURNED = 0;";
+    string sql = "SELECT B.ID, BK.TITLE, BK.AUTHOR, BK.YEAR, BK.PAGES, B.DUE_DATE, B.EMAIL FROM BORROWED_BOOKS B "
+                 "INNER JOIN BOOKS BK ON B.BOOK_ID = BK.ID "
+                 "WHERE B.RETURNED = 0;";
     
     char* message_error;
     int exit = sqlite3_exec(db, sql.c_str(), callback, 0, &message_error);
@@ -495,4 +498,4 @@ void Library::countByAuthor(const string& p_author) const {
     cout << "Books counted by author: " << p_author;
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
     sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
-} 
+}

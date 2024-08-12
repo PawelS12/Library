@@ -41,8 +41,6 @@ Kind Kind::selectKind() {
 
     transform(kind_name.begin(), kind_name.end(), kind_name.begin(), [](unsigned char c) { return tolower(c); });
 
-    cout << "Processed kind_name: " << kind_name << endl;
-
     if (kind_name == "crime") {
         return Kind(KindType::CRIME);
     } else if (kind_name == "horror") {

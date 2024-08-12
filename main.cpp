@@ -82,29 +82,35 @@ int main() {
             }
                 break;
             case 2: {
-                string title, due_date;
+                string title, due_date, email;
                 cout << "Enter title of book to borrow: ";
                 getline(cin, title);
 
                 cout << "Enter due date (YYYY-MM-DD): ";
                 getline(cin, due_date);
 
+                cout << "Enter your personal e-mail (to contact): ";
+                getline(cin, email);
+
                 Book book = library_1.getBookByTitle(title); 
-                BorrowedBook borrowed_book(0, book, due_date, false);
+                BorrowedBook borrowed_book(0, book, due_date, email, false);
 
                 library_1.borrowBook(borrowed_book);
             }
                 break;
             case 3: {
-                string title, due_date;
+                string title, due_date, email;
                 cout << "Enter title of book to return: ";
                 getline(cin, title);
 
                 cout << "Enter due date (YYYY-MM-DD): ";
                 getline(cin, due_date);
 
+                cout << "Enter email: ";
+                getline(cin, email);
+
                 Book book = library_1.getBookByTitle(title);
-                library_1.returnBook(book.getId(), due_date);
+                library_1.returnBook(book.getId(), due_date, email);
             }
                 break;
             case 4: {
