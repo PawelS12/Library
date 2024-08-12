@@ -20,21 +20,22 @@ int main() {
     do {
         cout << " \tLIBRARY MANAGEMENT SYSTEM" << endl << endl;
         cout << "Hello, select option below!" << endl;
-        cout << "1 \t- Add book." << endl;
-        cout << "2 \t- Borrow book." << endl;
-        cout << "3 \t- Return book." << endl;
-        cout << "4 \t- Remove book from library." << endl;
-        cout << "5 \t- Display all available books." << endl;
-        cout << "6 \t- Display all borrowed books." << endl;
-        cout << "7 \t- Display books by length." << endl;
-        cout << "8 \t- Count all books." << endl;
-        cout << "9 \t- Count books by author." << endl;
-        cout << "10 \t- Count books by kind." << endl;
-        cout << "11 \t- Search books by author." << endl;
-        cout << "12 \t- Search books by title." << endl;
-        cout << "13 \t- Search books by kind." << endl;
-        cout << "14 \t- Clear database." << endl;
-        cout << "0 \t- Exit." << endl << endl;
+        cout << "1\t- Add book." << endl;
+        cout << "2\t- Borrow book." << endl;
+        cout << "3\t- Return book." << endl;
+        cout << "4\t- Remove book from library." << endl;
+        cout << "5\t- Display all available books." << endl;
+        cout << "6\t- Display all borrowed books." << endl;
+        cout << "7\t- Display books by length." << endl;
+        cout << "8\t- Count all books." << endl;
+        cout << "9\t- Count books by author." << endl;
+        cout << "10\t- Count books by kind." << endl;
+        cout << "11\t- Search books by author." << endl;
+        cout << "12\t- Search books by title." << endl;
+        cout << "13\t- Search books by kind." << endl;
+        cout << "14\t- Sort books by lenght." << endl;
+        cout << "15\t- Clear database." << endl;
+        cout << "0\t- Exit." << endl << endl;
         cout << "Enter option." << endl;
 
         int option;
@@ -173,6 +174,14 @@ int main() {
             }
                 break;
             case 14: {
+                string choice;
+                cout << "Enter order (ascending/descending): ";
+                getline(cin, choice);
+
+                library_1.sortByLength(choice);
+            }
+                break;
+            case 15: {
                 string answer;
                 cout << "Are you sure to clear all data? (yes/no)" << endl;
                 cin >> answer;

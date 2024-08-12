@@ -28,6 +28,17 @@ int Library::callbackCount(void* data, int argc, char** argv, char** az_col_name
     return 0;
 }
 
+int Library::sort_callback(void* data, int argc, char** argv, char** az_col_name) {
+    if (argc >= 6) { 
+        cout << "Title: " << (argv[1] ? argv[1] : "NULL") << ", ";
+        cout << "Pages: " << (argv[5] ? argv[5] : "NULL") << endl;
+    } else {
+        cout << "Unexpected number of columns." << endl;
+    }
+    cout << "----------------------------" << endl;
+    return 0;
+}
+
 Library::Library(const string& db_name) {
     int exit = sqlite3_open(db_name.c_str(), &db);
     if (exit) {
@@ -498,4 +509,16 @@ void Library::countByAuthor(const string& p_author) const {
     cout << "Books counted by author: " << p_author;
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
     sqlite3_exec(db, sql.c_str(), callbackCount, 0, NULL);
+}
+
+void Library::sortByLength(const string& p_choice) const {
+    if (p_choice == "ascending") {
+        string sql = "SELECT * FROM BOOKS ORDER BY PAGES;";
+        sqlite3_exec(db, sql.c_str(), sort_callback, 0, NULL);
+    } else if (p_choice == "descending") {
+        string sql = "SELECT * FROM BOOKS ORDER BY PAGES DESC;";
+        sqlite3_exec(db, sql.c_str(), sort_callback, 0, NULL);
+    } else {
+        cout << "Try again." << endl;
+    }
 }
