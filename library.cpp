@@ -508,10 +508,10 @@ void Library::countByAuthor(const string& p_author) const {
 void Library::sortByLength(const string& p_choice) const {
     if (p_choice == "ascending") {
         string sql = "SELECT * FROM BOOKS ORDER BY PAGES;";
-        sqlExecute(sql, display_callback);
+        sqlExecute(sql, sort_callback);
     } else if (p_choice == "descending") {
         string sql = "SELECT * FROM BOOKS ORDER BY PAGES DESC;";
-        sqlExecute(sql, display_callback);
+        sqlExecute(sql, sort_callback);
     } else {
         cout << "Try again." << endl;
     }
