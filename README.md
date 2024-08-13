@@ -30,11 +30,11 @@ c) Open the `main.exe` file.
 ## 4. Usage Example
 
 ### Main Interface
-![Main Interface](https://github.com/user-attachments/assets/207c69ff-b733-42d3-984d-865f099da9ba)
+![Main Interface](https://github.com/user-attachments/assets/4de710f3-89d0-4c78-9545-d813a8e97f75)
 
 ### Adding Book
-![Adding Book](https://github.com/user-attachments/assets/a02442a2-2aca-4df2-b442-433c49165d84)
+![Adding Book](https://github.com/user-attachments/assets/309cb587-7cf5-45ee-a024-eec7d8526030)
 
 ### Displaying Available Books
-![Displaying Books](https://github.com/user-attachments/assets/f5448a2a-cbf1-4683-876c-05be8f1d9c94)
+![Displaying Books](https://github.com/user-attachments/assets/f1672bbe-84bb-436c-aaea-7bb1249ada44)
 
