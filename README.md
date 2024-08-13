@@ -15,15 +15,17 @@ This project is a library management system written using C++, SQLite, and SQL. 
 
 ## 2. Technologies
 
-- C++
-- SQLite
-- SQL
+- **C++**: Version 14.2.0
+- **SQLite**: Version 3.46.0
+- **SQL**
 
 ## 3. Installation
 
 a) Download `Library-master.zip` from my repository.  
 b) Extract the files to the selected folder.  
 c) Open the `main.exe` file.
+
+*Note: This application is designed to run on Windows. To ensure that the application functions correctly, make sure that all files from the `Library-master.zip` archive are present in the extracted folder.**
 
 ## 4. Usage Example
 
