@@ -3,7 +3,7 @@
 
 #include <string>
 #include <iostream>
-#include "Kind.h"
+#include "Genre.h"
 
 using std::string;
 
@@ -12,20 +12,20 @@ private:
     int id; 
     string title;
     string author;
-    Kind kind;
+    Genre genre;
     int year;
     int pages;
     int amount;
 
 public:
-    Book(int p_id, string p_title, string p_author, Kind p_kind, int p_year, int p_pages, int p_amount);
+    Book(int p_id, string p_title, string p_author, Genre p_genre, int p_year, int p_pages, int p_amount);
     Book();
     
     int getId() const;
     string getTitle() const;
     string getAuthor() const;
     int getYear() const;
-    Kind getKind() const;
+    Genre getGenre() const;
     int getPages() const;
     int getAmount() const;
     void setAmount(int p_amount);

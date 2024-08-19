@@ -10,7 +10,7 @@
                 "${workspaceFolder}/main.cpp",
                 "${workspaceFolder}/Book.cpp",
                 "${workspaceFolder}/BorrowedBook.cpp",
-                "${workspaceFolder}/Kind.cpp",
+                "${workspaceFolder}/Genre.cpp",
                 "${workspaceFolder}/library.cpp",
                 "${workspaceFolder}/DatabaseException.cpp",
                 "-o",

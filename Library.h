@@ -32,12 +32,12 @@ public:
     void countBooks() const;
     void searchByTitle(const string& p_title) const;
     void searchByAuthor(const string& p_author) const;
-    void searchByKind(const Kind& p_kind) const;
-    void countByKind(const Kind& p_kind) const;
+    void searchByGenre(const Genre& p_genre) const;
+    void countByGenre(const Genre& p_genre) const;
     void countByAuthor(const string& p_author) const;
     void sortByLength(const string& p_choice) const;
     void sqlExecute(const string& sql, int (*callback)(void*,int,char**,char**)) const;
-    Book getBookByTitle(const string& title) const;
+    Book getBookByTitle(const string& title, const string& author) const;
 };
 
 #endif // LIBRARY_H

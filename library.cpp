@@ -4,7 +4,7 @@
 #include "Library.h"
 #include "Book.h"
 #include "BorrowedBook.h"
-#include "Kind.h"
+#include "Genre.h"
 #include "DatabaseException.h"
 
 using std::cout;
@@ -49,7 +49,7 @@ Library::Library(const string& db_name) {
                  "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
                  "TITLE TEXT NOT NULL, "
                  "AUTHOR TEXT NOT NULL, "
-                 "KIND TEXT NOT NULL, "
+                 "GENRE TEXT NOT NULL, "
                  "YEAR INTEGER NOT NULL, "
                  "PAGES INTEGER NOT NULL,"
                  "AMOUNT INTEGER NOT NULL"
@@ -107,27 +107,29 @@ Library::~Library() {
     sqlite3_close(db);
 }
 
-Book Library::getBookByTitle(const string& title) const {
-    string sql = "SELECT * FROM BOOKS WHERE TITLE = ?;";
+Book Library::getBookByTitle(const string& title, const string& author) const {
+    string sql = "SELECT * FROM BOOKS WHERE TITLE = ? AND AUTHOR = ?;";
     sqlite3_stmt* stmt;
     int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
     if (exit != SQLITE_OK) {
         throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
     }
     sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, author.c_str(), -1, SQLITE_STATIC);
 
 
-    Book book; 
+    Book book;
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         int id = sqlite3_column_int(stmt, 0);
+        string title = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         string author = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-        int kindType = sqlite3_column_int(stmt, 3);
+        int genreType = sqlite3_column_int(stmt, 3);
         int year = sqlite3_column_int(stmt, 4);
         int pages = sqlite3_column_int(stmt, 5);
         int amount = sqlite3_column_int(stmt, 6);
 
-        Kind book_kind = Kind::fromInt(kindType); 
-        book = Book(id, title, author, book_kind, year, pages, amount);
+        Genre book_genre = Genre::fromInt(genreType);
+        book = Book(id, title, author, book_genre, year, pages, amount);
     } else {
         sqlite3_finalize(stmt);
         throw DatabaseException("Book not found.");
@@ -141,7 +143,7 @@ void Library::addBook(const Book& book) {
     sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 
     try {
-        string check_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ? AND AUTHOR = ? AND KIND = ? AND YEAR = ? AND PAGES = ?;";
+        string check_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ? AND AUTHOR = ? AND GENRE = ? AND YEAR = ? AND PAGES = ?;";
         sqlite3_stmt* stmt;
         int exit = sqlite3_prepare_v2(db, check_sql.c_str(), -1, &stmt, NULL);
         if (exit != SQLITE_OK) {
@@ -150,7 +152,7 @@ void Library::addBook(const Book& book) {
 
         sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 3, book.getKind().getSelectedKind().c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, book.getGenre().getSelectedGenre().c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_int(stmt, 4, book.getYear());
         sqlite3_bind_int(stmt, 5, book.getPages());
 
@@ -181,7 +183,7 @@ void Library::addBook(const Book& book) {
 
             sqlite3_finalize(stmt);
         } else {
-            string insert_sql = "INSERT INTO BOOKS (TITLE, AUTHOR, KIND, YEAR, PAGES, AMOUNT) VALUES (?, ?, ?, ?, ?, ?);";
+            string insert_sql = "INSERT INTO BOOKS (TITLE, AUTHOR, GENRE, YEAR, PAGES, AMOUNT) VALUES (?, ?, ?, ?, ?, ?);";
             
             exit = sqlite3_prepare_v2(db, insert_sql.c_str(), -1, &stmt, NULL);
             if (exit != SQLITE_OK) {
@@ -190,7 +192,7 @@ void Library::addBook(const Book& book) {
 
             sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
             sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
-            sqlite3_bind_text(stmt, 3, book.getKind().getSelectedKind().c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_text(stmt, 3, book.getGenre().getSelectedGenre().c_str(), -1, SQLITE_STATIC);
             sqlite3_bind_int(stmt, 4, book.getYear());
             sqlite3_bind_int(stmt, 5, book.getPages());
             sqlite3_bind_int(stmt, 6, book.getAmount());
@@ -222,15 +224,16 @@ void Library::borrowBook(const BorrowedBook& borrowed_book) {
     sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 
     try {
-        Book existing_book = getBookByTitle(title);
+        Book existing_book = getBookByTitle(title, book.getAuthor());
 
-        string sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
+        string sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ? AND AUTHOR = ?;";
         sqlite3_stmt* stmt;
         int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
         if (exit != SQLITE_OK) {
             throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
         }
         sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
 
         int book_id = -1;
         int amount = 0;
@@ -487,15 +490,15 @@ void Library::searchByAuthor(const string& p_author) const {
     sqlExecute(sql, display_callback);
 }
 
-void Library::searchByKind(const Kind& p_kind) const {                    
-    cout << "Books searched by kind: " << p_kind.getSelectedKind() << endl;
-    string sql = "SELECT * FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
+void Library::searchByGenre(const Genre& p_genre) const {                    
+    cout << "Books searched by genre: " << p_genre.getSelectedGenre() << endl;
+    string sql = "SELECT * FROM BOOKS WHERE GENRE = '" + p_genre.getSelectedGenre() + "';";
     sqlExecute(sql, display_callback);
 }
 
-void Library::countByKind(const Kind& p_kind) const {                     
-    cout << "Books counted by kind: " << p_kind.getSelectedKind();
-    string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE KIND = '" + p_kind.getSelectedKind() + "';";
+void Library::countByGenre(const Genre& p_genre) const {                     
+    cout << "Books counted by genre: " << p_genre.getSelectedGenre();
+    string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE GENRE = '" + p_genre.getSelectedGenre() + "';";
     sqlExecute(sql, count_callback);
 }
 

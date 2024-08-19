@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Kind.h"
+#include "Genre.h"
 #include "Book.h"
 #include "BorrowedBook.h"
 #include "Library.h"
@@ -29,10 +29,10 @@ int main() {
         cout << "7\t- Display books by length." << endl;
         cout << "8\t- Count all books." << endl;
         cout << "9\t- Count books by author." << endl;
-        cout << "10\t- Count books by kind." << endl;
+        cout << "10\t- Count books by genre." << endl;
         cout << "11\t- Search books by author." << endl;
         cout << "12\t- Search books by title." << endl;
-        cout << "13\t- Search books by kind." << endl;
+        cout << "13\t- Search books by genre." << endl;
         cout << "14\t- Sort books by lenght." << endl;
         cout << "15\t- Clear database." << endl;
         cout << "0\t- Exit." << endl << endl;
@@ -45,7 +45,7 @@ int main() {
 
         switch (option) {
             case 1: {
-                string title, author, kind;
+                string title, author, genre;
                 int year, pages, amount;
 
                 cout << "Enter title: ";
@@ -54,7 +54,7 @@ int main() {
                 cout << "Enter author: ";
                 getline(cin, author);
 
-                Kind book_kind = Kind::selectKind();
+                Genre book_genre = Genre::selectGenre();
 
                 cout << "Enter year: ";
                 while (!(cin >> year)) {
@@ -77,15 +77,18 @@ int main() {
                     cout << "Invalid input. Please enter a number for amount: ";
                 }
                 
-                Book new_book(0, title, author, book_kind, year, pages, amount);
+                Book new_book(0, title, author, book_genre, year, pages, amount);
                 
                 library_1.addBook(new_book);
             }
                 break;
             case 2: {
-                string title, due_date, email;
+                string title, author, due_date, email;
                 cout << "Enter title of book to borrow: ";
                 getline(cin, title);
+
+                cout << "Enter author of book to borrow: ";
+                getline(cin, author);
 
                 cout << "Enter due date (YYYY-MM-DD): ";
                 getline(cin, due_date);
@@ -93,16 +96,19 @@ int main() {
                 cout << "Enter your personal e-mail (to contact): ";
                 getline(cin, email);
 
-                Book book = library_1.getBookByTitle(title); 
+                Book book = library_1.getBookByTitle(title, author); 
                 BorrowedBook borrowed_book(0, book, due_date, email, false);
 
                 library_1.borrowBook(borrowed_book);
             }
                 break;
             case 3: {
-                string title, due_date, email;
+                string title, author, due_date, email;
                 cout << "Enter title of book to return: ";
                 getline(cin, title);
+
+                cout << "Enter author of book to return: ";
+                getline(cin, author);
 
                 cout << "Enter due date (YYYY-MM-DD): ";
                 getline(cin, due_date);
@@ -110,7 +116,7 @@ int main() {
                 cout << "Enter email: ";
                 getline(cin, email);
 
-                Book book = library_1.getBookByTitle(title);
+                Book book = library_1.getBookByTitle(title, author);
                 library_1.returnBook(book.getId(), due_date, email);
             }
                 break;
@@ -150,8 +156,8 @@ int main() {
             }
                 break;
             case 10: {
-                Kind book_kind = Kind::selectKind();
-                library_1.countByKind(book_kind);
+                Genre book_genre = Genre::selectGenre();
+                library_1.countByGenre(book_genre);
             }
                 break;
             case 11: {
@@ -169,8 +175,8 @@ int main() {
             }
                 break;
             case 13: {
-                Kind book_kind = Kind::selectKind();
-                library_1.searchByKind(book_kind);
+                Genre book_genre = Genre::selectGenre();
+                library_1.searchByGenre(book_genre);
             }
                 break;
             case 14: {
