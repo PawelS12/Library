@@ -215,6 +215,7 @@ void Library::addBook(const Book& book) {
 }
 
 void Library::borrowBook(const BorrowedBook& borrowed_book) {
+    
     const Book& book = borrowed_book.getBook();
     string title = book.getTitle();
     string due_date = borrowed_book.getDueDate();
