@@ -34,10 +34,12 @@ c) Open the `main.exe` file.
   <img src="https://github.com/user-attachments/assets/0b9eb269-6703-470b-9929-3e730e286d07" alt="Main Interface" width="50%">
 </p>
 
+
 ### Adding Book
 <p align="center">
   <img src="https://github.com/user-attachments/assets/df9c8a8e-e6ed-4507-981f-32f2d773b745" alt="Adding Book" width="100%">
 </p>
+
 
 ### Displaying Available Books
 <p align="center">
