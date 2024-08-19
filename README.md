@@ -25,16 +25,21 @@ a) Download `Library-master.zip` from my repository.
 b) Extract the files to the selected folder.  
 c) Open the `main.exe` file.
 
-*Note: This application is designed to run on Windows. To ensure that the application functions correctly, make sure that all files from the `Library-master.zip` archive are present in the extracted folder.**
+*Note: This application is designed to run on Windows. To ensure that the application functions correctly, make sure that all files from the `Library-master.zip` are present in the extracted folder.**
 
 ## 4. Usage Example
 
 ### Main Interface
-![Main Interface](https://github.com/user-attachments/assets/4de710f3-89d0-4c78-9545-d813a8e97f75)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0b9eb269-6703-470b-9929-3e730e286d07" alt="Main Interface">
+</p>
 
 ### Adding Book
-![Adding Book](https://github.com/user-attachments/assets/309cb587-7cf5-45ee-a024-eec7d8526030)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/df9c8a8e-e6ed-4507-981f-32f2d773b745" alt="Adding Book">
+</p>
 
 ### Displaying Available Books
-![Displaying Books](https://github.com/user-attachments/assets/f1672bbe-84bb-436c-aaea-7bb1249ada44)
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1d1b9e96-fe0e-4287-b47b-dd427f253047" alt="Displaying Books">
+</p>
