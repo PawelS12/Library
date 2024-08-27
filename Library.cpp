@@ -47,7 +47,7 @@ Library::Library(const string& db_name) {
 
     string sql = "CREATE TABLE IF NOT EXISTS BOOKS ("
                  "ID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                 "TITLE TEXT NOT NULL, "
+                 "TITLE TEXT NOT NULL CHECK(LENGTH(TITLE) <= 100), "
                  "AUTHOR TEXT NOT NULL, "
                  "GENRE TEXT NOT NULL, "
                  "YEAR INTEGER NOT NULL, "

@@ -7,6 +7,7 @@
 #include <limits> 
 
 using std::cout;
+using std::cerr;
 using std::cin;
 using std::endl;
 using std::numeric_limits;
@@ -45,12 +46,19 @@ int main() {
 
         switch (option) {
             case 1: {
+                const size_t max_title_length = 100;  
                 string title, author, genre;
                 int year, pages, amount;
 
                 cout << "Enter title: ";
-                getline(cin, title);
-
+                while (getline(cin, title)) {
+                    if (title.length() > max_title_length) {
+                    cout << "Title is too long. Maximum length is " << max_title_length << " characters. Please try again: ";
+                    } else {
+                        break;
+                    }
+                }
+                
                 cout << "Enter author: ";
                 getline(cin, author);
 
