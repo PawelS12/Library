@@ -150,9 +150,9 @@ void Library::addBook(const Book& book) {
             throw DatabaseException("Error during SELECT statement: " + string(sqlite3_errmsg(db)));
         }
 
-        sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
-        sqlite3_bind_text(stmt, 3, book.getGenre().getSelectedGenre().c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_TRANSIENT);
+        sqlite3_bind_text(stmt, 3, book.getGenre().getSelectedGenre().c_str(), -1, SQLITE_TRANSIENT);
         sqlite3_bind_int(stmt, 4, book.getYear());
         sqlite3_bind_int(stmt, 5, book.getPages());
 
@@ -190,9 +190,9 @@ void Library::addBook(const Book& book) {
                 throw DatabaseException("Error during INSERT prepare statement: " + string(sqlite3_errmsg(db)));
             }
 
-            sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_STATIC);
-            sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_STATIC);
-            sqlite3_bind_text(stmt, 3, book.getGenre().getSelectedGenre().c_str(), -1, SQLITE_STATIC);
+            sqlite3_bind_text(stmt, 1, book.getTitle().c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(stmt, 2, book.getAuthor().c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(stmt, 3, book.getGenre().getSelectedGenre().c_str(), -1, SQLITE_TRANSIENT);
             sqlite3_bind_int(stmt, 4, book.getYear());
             sqlite3_bind_int(stmt, 5, book.getPages());
             sqlite3_bind_int(stmt, 6, book.getAmount());
@@ -449,6 +449,7 @@ void Library::displayAllBooks() {
     cout << "----------------------------" << endl;
     string sql = "SELECT * FROM BOOKS;";
     sqlExecute(sql, display_callback);
+    cout << endl;
 }
 
 void Library::displayBorrowedBooks() {
@@ -460,53 +461,64 @@ void Library::displayBorrowedBooks() {
                  "WHERE B.RETURNED = 0;";
     
     sqlExecute(sql, display_callback);
+    cout << endl;
 }
 
 void Library::displayBooksByLength() const {                                 
-    cout << "Long books (>= 400 pages): " << endl;
+    cout << "Long books (>= 400 pages): " << endl << endl;
     string sql = "SELECT * FROM BOOKS WHERE PAGES >= 400;";
     sqlExecute(sql, display_callback);
-    cout << endl;
+    cout << endl << endl;
 
-    cout << "Short books (< 400 pages): " << endl;
+    cout << "Short books (< 400 pages): " << endl << endl;
     sql = "SELECT * FROM BOOKS WHERE PAGES < 400;";
     sqlExecute(sql, display_callback);
+    cout << endl;
 }
 
 void Library::countBooks() const {                                         
-    cout << "Number of all books in library: ";
+    cout << endl << "Number of all books in library: ";
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS;";
     sqlExecute(sql, count_callback);
+    cout << endl;
 } 
 
 void Library::searchByTitle(const string& p_title) const {                  
-    cout << "Book searched by title: " << p_title << endl;
+    cout << endl << "Book searched by title: " << p_title << endl;
+    cout << "----------------------------" << endl;
     string sql = "SELECT * FROM BOOKS WHERE TITLE = '" + p_title + "';";
     sqlExecute(sql, display_callback);
+    cout << endl;
 }
 
 void Library::searchByAuthor(const string& p_author) const {               
-    cout << "Books searched by author: " << p_author << endl;
+    cout << endl << "Books searched by author: " << p_author << endl;
+    cout << "----------------------------" << endl;
     string sql = "SELECT * FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
     sqlExecute(sql, display_callback);
+    cout << endl;
 }
 
 void Library::searchByGenre(const Genre& p_genre) const {                    
-    cout << "Books searched by genre: " << p_genre.getSelectedGenre() << endl;
+    cout << endl << "Books searched by genre: " << p_genre.getSelectedGenre() << endl;
+    cout << "----------------------------" << endl;
     string sql = "SELECT * FROM BOOKS WHERE GENRE = '" + p_genre.getSelectedGenre() + "';";
     sqlExecute(sql, display_callback);
+    cout << endl;
 }
 
 void Library::countByGenre(const Genre& p_genre) const {                     
-    cout << "Books counted by genre: " << p_genre.getSelectedGenre();
+    cout << endl << "Books counted by genre: " << p_genre.getSelectedGenre();
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE GENRE = '" + p_genre.getSelectedGenre() + "';";
     sqlExecute(sql, count_callback);
+    cout << endl;
 }
 
 void Library::countByAuthor(const string& p_author) const {                
-    cout << "Books counted by author: " << p_author;
+    cout << endl << "Books counted by author: " << p_author;
     string sql = "SELECT SUM(AMOUNT) FROM BOOKS WHERE AUTHOR = '" + p_author + "';";
     sqlExecute(sql, count_callback);
+    cout << endl;
 }
 
 void Library::sortByLength(const string& p_choice) const {
@@ -519,4 +531,5 @@ void Library::sortByLength(const string& p_choice) const {
     } else {
         cout << "Try again." << endl;
     }
+    cout << endl;
 }
