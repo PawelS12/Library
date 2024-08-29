@@ -43,5 +43,5 @@ c) Open the `main.exe` file.
 
 ### Displaying Available Books
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/708d1823-8be2-4b85-9e9b-5c2b0acfc833" alt="Displaying Books" width="50%">
+  <img src="https://github.com/user-attachments/assets/708d1823-8be2-4b85-9e9b-5c2b0acfc833" alt="Displaying Books" width="40%">
 </p>
