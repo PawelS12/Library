@@ -31,7 +31,7 @@ c) Open the `main.exe` file.
 
 ### Main Interface
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/092a22f9-93fd-459b-bbd5-545f4fca90a2" alt="Main Interface" width="50%">
+  <img src="https://github.com/user-attachments/assets/fe8be19b-b87f-4fbc-b021-7fa1540c80da" alt="Main Interface" width="50%">
 </p>
 <br><br>
 
@@ -43,5 +43,5 @@ c) Open the `main.exe` file.
 
 ### Displaying Available Books
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/0a8826d3-898a-478d-bca5-dc22d4f24058" alt="Displaying Books" width="50%">
+  <img src="https://github.com/user-attachments/assets/708d1823-8be2-4b85-9e9b-5c2b0acfc833" alt="Displaying Books" width="50%">
 </p>
