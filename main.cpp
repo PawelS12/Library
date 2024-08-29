@@ -129,10 +129,13 @@ int main() {
             }
                 break;
             case 4: {
-                string title;
+                string title, author;
                 int amount;
                 cout << "Enter title of book to remove: ";
                 getline(cin, title);
+
+                cout << "Enter author of book to remove: ";
+                getline(cin, author);
 
                 cout << "Enter amount: ";
                 while (!(cin >> amount)) {
@@ -141,7 +144,7 @@ int main() {
                     cout << "Invalid input. Please enter a number for amount: ";
                 }
 
-                library_1.removeBook(title, amount);
+                library_1.removeBook(title, author, amount);
             }
                 break;
             case 5:

@@ -361,11 +361,11 @@ void Library::returnBook(int book_id, const string& due_date, const string& emai
     }
 }
 
-void Library::removeBook(const string& title, int amount) {
+void Library::removeBook(const string& title, const string& author, int amount) {
     sqlite3_exec(db, "BEGIN TRANSACTION;", nullptr, nullptr, nullptr);
 
     try {
-        string select_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ?;";
+        string select_sql = "SELECT ID, AMOUNT FROM BOOKS WHERE TITLE = ? AND AUTHOR = ?;";
         
         sqlite3_stmt* stmt;
         int exit = sqlite3_prepare_v2(db, select_sql.c_str(), -1, &stmt, NULL);
@@ -374,6 +374,7 @@ void Library::removeBook(const string& title, int amount) {
         }
 
         sqlite3_bind_text(stmt, 1, title.c_str(), -1, SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, author.c_str(), -1, SQLITE_STATIC);
 
         int book_id = -1;
         int current_amount = 0;

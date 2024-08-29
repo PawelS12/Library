@@ -10,7 +10,7 @@ using std::invalid_argument;
 using std::transform;
 using std::tolower;
 
-const vector<string> Genre::genres = {"Crime", "Horror", "Fantasy", "Fairy tale", "Reportage", "Contemporary literature", "Romance", "Scientific literature", "Thriller", "Poetry", "Science fiction"};
+const vector<string> Genre::genres = {"Crime", "Horror", "Fantasy", "Fairy tale", "Reportage", "Contemporary literature", "Romance", "Scientific literature", "Thriller", "Poetry", "Science fiction", "Biography"};
 
 Genre::Genre(GenreType Genre) : selected_genre(Genre) {}
 
@@ -36,7 +36,7 @@ Genre Genre::fromInt(int genreType) {
 
 Genre Genre::selectGenre() {
     string genre_name;
-    cout << "Enter the genre of book (crime, horror, fantasy, fairy tale, reportage, contemporary literature, romance, scientific literature, thriller, poetry, sci-fi): ";
+    cout << "Enter the genre of book (crime, horror, fantasy, fairy tale, reportage, contemporary literature, romance, scientific literature, thriller, poetry, sci-fi, biography): ";
     getline(cin, genre_name);
 
     transform(genre_name.begin(), genre_name.end(), genre_name.begin(), [](unsigned char c) { return tolower(c); });
@@ -63,6 +63,8 @@ Genre Genre::selectGenre() {
         return Genre(GenreType::POETRY);
     } else if (genre_name == "sci-fi" || genre_name == "science fiction" || genre_name == "science_fiction") {
         return Genre(GenreType::SCI_FI);
+    } else if (genre_name == "biography") {
+        return Genre(GenreType::BIOGRAPHY);
     } else {
         cout << "Invalid genre entered. Defaulting to CRIME." << endl;
         return Genre(GenreType::CRIME);
