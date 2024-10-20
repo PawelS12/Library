@@ -13,6 +13,7 @@
                 "${workspaceFolder}/Genre.cpp",
                 "${workspaceFolder}/library.cpp",
                 "${workspaceFolder}/DatabaseException.cpp",
+                "${workspaceFolder}/Menu.cpp",
                 "-o",
                 "${workspaceFolder}/main.exe",
                 "-L",
