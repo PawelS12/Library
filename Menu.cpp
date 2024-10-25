@@ -19,13 +19,13 @@ void displayMenu(Library& library) {
     do {
         cout << " \tLIBRARY MANAGEMENT SYSTEM" << endl << endl;
         cout << "Hello, select option below!" << endl;
-        cout << "1\t- Add book." << endl;
-        cout << "2\t- Borrow book." << endl;
-        cout << "3\t- Return book." << endl;
-        cout << "4\t- Remove book from library." << endl;
+        cout << "1\t- Add a book." << endl;
+        cout << "2\t- Borrow a book." << endl;
+        cout << "3\t- Return a book." << endl;
+        cout << "4\t- Remove a book from library." << endl;
         cout << "5\t- Display all available books." << endl;
         cout << "6\t- Display all borrowed books." << endl;
-        cout << "7\t- Display books by length." << endl;
+        cout << "7\t- Display books divided into long and short." << endl;
         cout << "8\t- Count all books." << endl;
         cout << "9\t- Count books by author." << endl;
         cout << "10\t- Count books by genre." << endl;
@@ -33,7 +33,7 @@ void displayMenu(Library& library) {
         cout << "12\t- Search books by title." << endl;
         cout << "13\t- Search books by genre." << endl;
         cout << "14\t- Sort books by length." << endl;
-        cout << "15\t- Clear database." << endl;
+        cout << "15\t- Clear the database." << endl;
         cout << "0\t- Exit." << endl << endl;
         cout << "Enter option." << endl;
 
