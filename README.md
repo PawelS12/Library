@@ -27,7 +27,7 @@ This project is a library management system written using C++, SQLite, and SQL. 
 
 a) Download `Library-master.zip` from my repository.  
 b) Extract the files to the selected folder.  
-c) Open the `main.exe` file.
+c) Open the `Library.exe` file.
 
 *Note: To ensure that the application functions correctly, make sure that all files from the `Library-master.zip` are present in the extracted folder.**
 
