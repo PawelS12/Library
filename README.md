@@ -30,3 +30,6 @@ b) Extract the files to the selected folder.
 c) Open the `main.exe` file.
 
 *Note: To ensure that the application functions correctly, make sure that all files from the `Library-master.zip` are present in the extracted folder.**
+
+## License
+The project is licensed under the terms of the MIT License. See the `LICENSE` file for details.
