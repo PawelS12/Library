@@ -17,7 +17,9 @@ void displayMenu(Library& library) {
     bool is_open = true;
 
     do {
-        cout << " \tLIBRARY MANAGEMENT SYSTEM" << endl << endl;
+        cout << "=============================================" << endl;
+        cout << "           LIBRARY MANAGEMENT SYSTEM        " << endl;
+        cout << "=============================================" << endl << endl;
         cout << "Hello, select option below!" << endl;
         cout << "1\t- Add a book." << endl;
         cout << "2\t- Borrow a book." << endl;
@@ -35,11 +37,13 @@ void displayMenu(Library& library) {
         cout << "14\t- Sort books by length." << endl;
         cout << "15\t- Clear the database." << endl;
         cout << "0\t- Exit." << endl << endl;
-        cout << "Enter option." << endl;
+        cout << "Enter option: ";
 
         int option;
         cin >> option;
         cin.ignore();
+
+        cout << endl;
 
         switch (option) {
             case 1: {
