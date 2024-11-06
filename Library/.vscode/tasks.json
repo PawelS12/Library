@@ -15,7 +15,7 @@
                 "${workspaceFolder}/DatabaseException.cpp",
                 "${workspaceFolder}/Menu.cpp",
                 "-o",
-                "${workspaceFolder}/main.exe",
+                "${workspaceFolder}/Library.exe",
                 "-L",
                 "C:/msys64/mingw64/lib",
                 "-I",
