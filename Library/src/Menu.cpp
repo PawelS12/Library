@@ -5,6 +5,7 @@
 #include "BorrowedBook.h"
 #include "Library.h"
 #include "DatabaseException.h"
+#include "DatabaseStatistics.h"
 #include <limits>
 
 using std::cout;
@@ -13,7 +14,7 @@ using std::endl;
 using std::numeric_limits;
 using std::streamsize;
 
-void displayMenu(Library& library) {
+void Menu::handleMenu(Library& library) {
     bool is_open = true;
 
     do {
@@ -35,7 +36,8 @@ void displayMenu(Library& library) {
         cout << "12\t- Search books by title." << endl;
         cout << "13\t- Search books by genre." << endl;
         cout << "14\t- Sort books by length." << endl;
-        cout << "15\t- Clear the database." << endl;
+        cout << "15\t- Generate library statistics." << endl;
+        cout << "16\t- Clear the database." << endl;
         cout << "0\t- Exit." << endl << endl;
         cout << "Enter option: ";
 
@@ -199,6 +201,13 @@ void displayMenu(Library& library) {
             }
                 break;
             case 15: {
+                DatabaseStatistics statistics(library.getDatabase());
+                statistics.generateStatistics("../Library/statistics/library_stats.txt", false);  
+                statistics.generateStatistics("../Library/statistics/library_stats.csv", true);
+                statistics.generateBooksDetails("../Library/statistics/books_details.txt", "books_details.csv");
+            }
+                break;
+            case 16: {
                 string answer;
                 cout << "Are you sure to clear all data? (yes/no)" << endl;
                 cin >> answer;

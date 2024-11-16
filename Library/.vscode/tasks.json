@@ -7,26 +7,29 @@
             "command": "g++",
             "args": [
                 "-g",
-                "${workspaceFolder}/main.cpp",
-                "${workspaceFolder}/Book.cpp",
-                "${workspaceFolder}/BorrowedBook.cpp",
-                "${workspaceFolder}/Genre.cpp",
-                "${workspaceFolder}/library.cpp",
-                "${workspaceFolder}/DatabaseException.cpp",
-                "${workspaceFolder}/Menu.cpp",
+                "${workspaceFolder}/src/main.cpp",
+                "${workspaceFolder}/src/Book.cpp",
+                "${workspaceFolder}/src/BorrowedBook.cpp",
+                "${workspaceFolder}/src/Genre.cpp",
+                "${workspaceFolder}/src/Library.cpp",
+                "${workspaceFolder}/src/DatabaseException.cpp",
+                "${workspaceFolder}/src/Menu.cpp",
+                "${workspaceFolder}/src/DatabaseStatistics.cpp",
                 "-o",
                 "${workspaceFolder}/Library.exe",
                 "-L",
                 "C:/msys64/mingw64/lib",
                 "-I",
                 "C:/msys64/mingw64/include",
+                "-I",
+                "${workspaceFolder}/include",
                 "-lsqlite3"
             ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": ["$gcc"],
+            "problemMatcher": ["$gcc"]
         }
     ]
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 #include "Library.h"
 #include "Book.h"
 #include "BorrowedBook.h"
@@ -12,6 +13,7 @@ using std::endl;
 using std::string;
 using std::vector;
 using std::cerr;
+using namespace std::filesystem;
 
 int Library::count_callback(void* data, int argc, char** argv, char** az_col_name) {       
     if (argc > 0 && argv[0]) {
@@ -40,7 +42,16 @@ int Library::display_callback(void* data, int argc, char** argv, char** az_col_n
 }
 
 Library::Library(const string& db_name) {
+    
+    path db_path(db_name);
+    path directory = db_path.parent_path();
+    
+    if (!exists(directory)) {
+        create_directories(directory);
+    }
+
     int exit = sqlite3_open(db_name.c_str(), &db);
+
     if (exit) {
         throw DatabaseException("Error open data base: " + string(sqlite3_errmsg(db)));
     }
@@ -105,6 +116,10 @@ Library::Library(const string& db_name) {
 
 Library::~Library() {
     sqlite3_close(db);
+}
+
+sqlite3* Library::getDatabase() const {
+    return db; 
 }
 
 Book Library::getBookByTitle(const string& title, const string& author) const {
