@@ -14,7 +14,7 @@ using std::endl;
 using std::numeric_limits;
 using std::streamsize;
 
-void Menu::displayMenu() {
+void LibraryMenu::displayMenu() {
     cout << "=============================================" << endl;
         cout << "           LIBRARY MANAGEMENT SYSTEM        " << endl;
         cout << "=============================================" << endl << endl;
@@ -39,7 +39,7 @@ void Menu::displayMenu() {
         cout << "Enter option: ";
 }
 
-void Menu::handleMenu(Library& library) {
+void LibraryMenu::handleMenu(Library& library) {
     bool is_open = true;
 
     do {
@@ -111,7 +111,7 @@ void Menu::handleMenu(Library& library) {
     } while(is_open);
 }
 
-void Menu::handleAddBook(Library& library){
+void LibraryMenu::handleAddBook(Library& library){
     const size_t max_title_length = 100;  
     string title, author, genre;
     int year, pages, amount;
@@ -155,7 +155,7 @@ void Menu::handleAddBook(Library& library){
     library.addBook(new_book);
 }
 
-void Menu::handleBorrowBook(Library& library) {
+void LibraryMenu::handleBorrowBook(Library& library) {
     string title, author, due_date, email;
     cout << "Enter title of book to borrow: ";
     getline(cin, title);
@@ -175,7 +175,7 @@ void Menu::handleBorrowBook(Library& library) {
     library.borrowBook(borrowed_book);
 }
 
-void Menu::handleReturnBook(Library& library) {
+void LibraryMenu::handleReturnBook(Library& library) {
     string title, author, due_date, email;
     cout << "Enter title of book to return: ";
     getline(cin, title);
@@ -193,7 +193,7 @@ void Menu::handleReturnBook(Library& library) {
     library.returnBook(book.getId(), due_date, email);
 }
 
-void handleRemoveBook(Library& library) {
+void LibraryMenu::handleRemoveBook(Library& library) {
     string title, author;
     int amount;
     cout << "Enter title of book to remove: ";
@@ -212,68 +212,68 @@ void handleRemoveBook(Library& library) {
     library.removeBook(title, author, amount);
 }
 
-void Menu::handleDisplayAllBooks(Library& library) {
+void LibraryMenu::handleDisplayAllBooks(Library& library) {
     library.displayAllBooks();
 }
 
-void Menu::handleDisplayBorrowedBooks(Library& library) {
+void LibraryMenu::handleDisplayBorrowedBooks(Library& library) {
     library.displayBorrowedBooks();
 }
 
-void Menu::handleDisplayBooksByLength(Library& library) {
+void LibraryMenu::handleDisplayBooksByLength(Library& library) {
     library.displayBooksByLength();
 }
 
-void Menu::handleCountBooks(Library& library) {
+void LibraryMenu::handleCountBooks(Library& library) {
     library.countBooks();
 }
 
-void Menu::handleCountByAuthor(Library& library) {
+void LibraryMenu::handleCountByAuthor(Library& library) {
     string author;
     cout << "Enter author of books: ";
     getline(cin, author);
     library.countByAuthor(author);
 }
 
-void Menu::handleCountByGenre(Library& library) {
+void LibraryMenu::handleCountByGenre(Library& library) {
     Genre book_genre = Genre::selectGenre();
     library.countByGenre(book_genre);
 }
 
-void Menu::handleSearchByAuthor(Library& library) {
+void LibraryMenu::handleSearchByAuthor(Library& library) {
     string author;
     cout << "Enter author to search: ";
     getline(cin, author);
     library.searchByAuthor(author);
 }
 
-void Menu::handleSearchByTitle(Library& library) {
+void LibraryMenu::handleSearchByTitle(Library& library) {
     string title;
     cout << "Enter title to search: ";
     getline(cin, title);
     library.searchByTitle(title);
 }
 
-void Menu::handleSearchByGenre(Library& library) {
+void LibraryMenu::handleSearchByGenre(Library& library) {
     Genre book_genre = Genre::selectGenre();
     library.searchByGenre(book_genre);
 }
 
-void Menu::handleSortByLength(Library& library) {
+void LibraryMenu::handleSortByLength(Library& library) {
     string choice;
     cout << "Enter order (ascending/descending): ";
     getline(cin, choice);
     library.sortByLength(choice);
 }
 
-void Menu::handleGenerateStatistics(Library& library) {
+void LibraryMenu::handleGenerateStatistics(Library& library) {
     DatabaseStatistics statistics(library.getDatabase());
     statistics.generateStatistics("../Library/statistics/library_stats.txt", false);  
     statistics.generateStatistics("../Library/statistics/library_stats.csv", true);
     statistics.generateBooksDetails("../Library/statistics/books_details.txt", "../Library/statistics/books_details.csv");
 }
 
-void Menu::handleClearDatabase(Library& library) {
+void LibraryMenu::handleClearDatabase(Library& library) {
     string answer;
     cout << "Are you sure to clear all data? (yes/no)" << endl;
     cin >> answer;

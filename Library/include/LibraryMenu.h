@@ -1,11 +1,11 @@
-#ifndef MENU_H
-#define MENU_H
+#ifndef LIBRARY_MENU_H
+#define LIBRARY_MENU_H
 
 #include "Library.h"
 
-class Menu {
+class LibraryMenu {
 public:
-    Menu() {};
+    LibraryMenu() {};
     void displayMenu();
     void handleMenu(Library& library);
     void handleAddBook(Library& library);
@@ -26,4 +26,4 @@ public:
     void handleClearDatabase(Library& library); 
 };
 
-#endif // MENU_H
+#endif // LIBRARY_MENU_H

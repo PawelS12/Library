@@ -13,9 +13,9 @@ int main() {
 
     try {
 
-        Library library_1("../Library/database/library.db"); 
-        Menu menu_1;
-        menu_1.handleMenu(library_1);
+        Library library("../Library/database/library.db"); 
+        LibraryMenu menu;
+        menu.handleMenu(library);
 
     } catch (const DatabaseException& e) {
 
