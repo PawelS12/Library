@@ -3,8 +3,7 @@
 #include "Library.h"
 #include "DatabaseException.h"
 #include "DatabaseStatistics.h"
-#include "Menu.h"
-#include "DatabaseStatistics.h"
+#include "LibraryMenu.h"
 
 using std::cout;
 using std::cerr;

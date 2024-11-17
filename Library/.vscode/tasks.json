@@ -13,7 +13,7 @@
                 "${workspaceFolder}/src/Genre.cpp",
                 "${workspaceFolder}/src/Library.cpp",
                 "${workspaceFolder}/src/DatabaseException.cpp",
-                "${workspaceFolder}/src/Menu.cpp",
+                "${workspaceFolder}/src/LibraryMenu.cpp",
                 "${workspaceFolder}/src/DatabaseStatistics.cpp",
                 "-o",
                 "${workspaceFolder}/Library.exe",

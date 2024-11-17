@@ -3,73 +3,71 @@
 #include <fstream>
 #include <map>
 #include <sqlite3.h>
-#include <codecvt>
-#include <locale>
+#include <filesystem>
 
 using std:: cerr;
 using std::endl;
 using std::string;
 using std::ofstream;
 using std::map;
+using namespace std::filesystem;
 
 DatabaseStatistics::DatabaseStatistics(sqlite3* db) : db(db) {}
 
-void DatabaseStatistics::generateStatistics(const string& filename, bool isCSV) {
-    ofstream outputFile(filename);
-    if (!outputFile.is_open()) {
+void DatabaseStatistics::generateStatistics(const string& filename, bool is_CSV) {
+    ofstream output_file(filename);
+    if (!output_file.is_open()) {
         cerr << "Failed to open the file: " << filename << endl;
         return;
     }
 
-    map<string, int> authorCount;
-    getCountByAuthor(authorCount);
+    map<string, int> author_count;
+    getCountByAuthor(author_count);
 
-    map<string, int> genreCount;
-    getCountByGenre(genreCount);
+    map<string, int> genre_count;
+    getCountByGenre(genre_count);
 
     int totalBooks = getTotalBooks();
 
-    if (isCSV) {
-        outputFile << "Total Books, " << totalBooks << "\n";
-        outputFile << "Books by Author:\n";
-        for (const auto& entry : authorCount) {
-            outputFile << entry.first << ", " << entry.second << "\n";
+    if (is_CSV) {
+        output_file << "Total Books, " << totalBooks << "\n";
+        output_file << "Books by Author:\n";
+        for (const auto& entry : author_count) {
+            output_file << entry.first << ", " << entry.second << "\n";
         }
-        outputFile << "Books by Genre:\n";
-        for (const auto& entry : genreCount) {
-            outputFile << entry.first << ", " << entry.second << "\n";
+        output_file << "Books by Genre:\n";
+        for (const auto& entry : genre_count) {
+            output_file << entry.first << ", " << entry.second << "\n";
         }
     } else {
-        outputFile << "Total Books: " << totalBooks << endl;
-        outputFile << "Books by Author:" << endl;
-        for (const auto& entry : authorCount) {
-            outputFile << entry.first << ": " << entry.second << endl;
+        output_file << "Total Books: " << totalBooks << endl << endl;
+        output_file << "Books by Author:" << endl;
+        for (const auto& entry : author_count) {
+            output_file << entry.first << ": " << entry.second << endl;
         }
-        outputFile << "Books by Genre:" << endl;
-        for (const auto& entry : genreCount) {
-            outputFile << entry.first << ": " << entry.second << endl;
+        output_file << "\nBooks by Genre:" << endl;
+        for (const auto& entry : genre_count) {
+            output_file << entry.first << ": " << entry.second << endl;
         }
     }
 
-    outputFile.close();
+    output_file.close();
 }
 
 void DatabaseStatistics::generateBooksDetails(const string& txt_filename, const string& csv_filename) {
-    // std::locale utf8Locale(std::locale(), new std::codecvt_utf8<char>());
 
-    ofstream txt_file(txt_filename);
-    ofstream csv_File(csv_filename);
+    path txt_path(txt_filename);
+    path csv_path(csv_filename); 
 
-    // txt_file.imbue(utf8Locale);
-    // csv_File.imbue(utf8Locale);
+    ofstream txt_file(txt_path);
+    ofstream csv_file(csv_path);
 
-
-    if (!txt_file.is_open() || !csv_File.is_open()) {
+    if (!txt_file.is_open() || !csv_file.is_open()) {
         cerr << "Failed to open the files: " << txt_filename << " or " << csv_filename << endl;
         return;
     }
 
-    csv_File << "Title, Author, Genre, Year, Amount\n";
+    csv_file << "Title, Author, Genre, Year, Amount\n";
 
     string sql = "SELECT TITLE, AUTHOR, GENRE, YEAR, AMOUNT FROM BOOKS;";
     sqlite3_stmt* stmt;
@@ -86,19 +84,18 @@ void DatabaseStatistics::generateBooksDetails(const string& txt_filename, const 
         int year = sqlite3_column_int(stmt, 3);
         int amount = sqlite3_column_int(stmt, 4);
 
-        txt_file << "Title: " << title << ", Author: " << author << ", Genre: " << genre
-                << ", Year: " << year << ", Amount: " << amount << endl;
+        txt_file << "Title: " << title << ", Author: " << author << ", Genre: " << genre << ", Year: " << year << ", Amount: " << amount << endl;
 
-        csv_File << title << "," << author << "," << genre << "," << year << "," << amount << "\n";
+        csv_file << title << "," << author << "," << genre << "," << year << "," << amount << "\n";
     }
 
     sqlite3_finalize(stmt);
 
     txt_file.close();
-    csv_File.close();
+    csv_file.close();
 }
 
-void DatabaseStatistics::getCountByAuthor(map<string, int>& authorCount) {
+void DatabaseStatistics::getCountByAuthor(map<string, int>& author_count) {
     string sql = "SELECT AUTHOR, SUM(AMOUNT) FROM BOOKS GROUP BY AUTHOR;";
     sqlite3_stmt* stmt;
     int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
@@ -110,13 +107,13 @@ void DatabaseStatistics::getCountByAuthor(map<string, int>& authorCount) {
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         string author = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         int amount = sqlite3_column_int(stmt, 1);
-        authorCount[author] = amount;
+        author_count[author] = amount;
     }
 
     sqlite3_finalize(stmt);
 }
 
-void DatabaseStatistics::getCountByGenre(map<string, int>& genreCount) {
+void DatabaseStatistics::getCountByGenre(map<string, int>& genre_count) {
     string sql = "SELECT GENRE, SUM(AMOUNT) FROM BOOKS GROUP BY GENRE;";
     sqlite3_stmt* stmt;
     int exit = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
@@ -128,7 +125,7 @@ void DatabaseStatistics::getCountByGenre(map<string, int>& genreCount) {
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         string genre = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         int amount = sqlite3_column_int(stmt, 1);
-        genreCount[genre] = amount;
+        genre_count[genre] = amount;
     }
 
     sqlite3_finalize(stmt);
@@ -143,11 +140,11 @@ int DatabaseStatistics::getTotalBooks() {
         return 0;
     }
 
-    int totalBooks = 0;
+    int total_books = 0;
     if (sqlite3_step(stmt) == SQLITE_ROW) {
-        totalBooks = sqlite3_column_int(stmt, 0);
+        total_books = sqlite3_column_int(stmt, 0);
     }
 
     sqlite3_finalize(stmt);
-    return totalBooks;
+    return total_books;
 }
