@@ -2,21 +2,15 @@
 
 ## 1. Project Description
 
-This project is a library management system written using C++, SQLite, and SQL. The main features of the system include:
+The **Library Management System** is a C++ application integrated with SQLite to manage a library of books. The system allows users to:
 
-- Adding new books to the database.
-- Borrowing books.
-- Returning borrowed books.
-- Removing books from the library.
-- Displaying a list of all available books.
-- Displaying a list of all borrowed books.
-- Displaying books divided into long and short.
-- Counting the total number of books.
-- Counting books by author or genre.
-- Searching for books by author, title or genre.
-- Sorting books by length.
-- Generating library statistics in csv and txt files.
-- Clearing the entire database.
+- Add, borrow, and return books.
+- Remove books from the library.
+- View available and borrowed books.
+- Sort books by length.
+- Search for books by title, author, or genre.
+- Generate library statistics (in CSV and TXT formats).
+- Manage library data with various sorting and counting features.
 
 ## 2. Technologies
 
@@ -30,7 +24,7 @@ a) Download `Library-master.zip` from my repository.
 b) Extract the files to the selected folder.  
 c) Open the `Library.exe` file.
 
-*Note: To ensure that the application functions correctly, make sure that all files from the `Library-master.zip` are present in the extracted folder.**
+*Note: No additional libraries or dependencies are required to run the application. Simply download the entire project folder and run the executable (`Library.exe`). Ensure all files from the zip are present in the extracted folder for the system to work correctly.*
 
 ## 4. Project structure
 ``` 
