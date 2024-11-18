@@ -26,6 +26,12 @@ c) Open the `Library.exe` file.
 
 *Note: No additional libraries or dependencies are required to run the application. Simply download the entire project folder and run the executable (`Library.exe`). Ensure all files from the zip are present in the extracted folder for the system to work correctly.*
 
+If you see a warning that the executable is from an "unknown publisher" when trying to open `Library.exe`, you can bypass this warning by following these steps:
+1. Click **"More info"** on the warning screen.
+2. Click **"Run anyway"** to continue running the application.
+
+This is a standard Windows security feature for files downloaded from the internet, and it can be ignored in this case since the application is safe to run.
+
 ## 4. Project structure
 ``` 
 Library/
