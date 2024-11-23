@@ -6,6 +6,7 @@
 class LibraryMenu {
 public:
     LibraryMenu() {};
+    
     void displayMenu();
     void handleMenu(Library& library);
     void handleAddBook(Library& library);

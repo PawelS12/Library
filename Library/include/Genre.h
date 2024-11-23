@@ -20,6 +20,7 @@ private:
 public:
     Genre(GenreType genre);
     Genre(const Genre& other);
+    
     Genre& operator=(const Genre& other);
     string getSelectedGenre() const;
     static Genre selectGenre();

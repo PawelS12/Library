@@ -15,6 +15,7 @@ private:
     sqlite3* db;
 public:
     DatabaseStatistics(sqlite3* db);
+    
     void generateStatistics(const string& filename, bool isCSV = false);
     void generateBooksDetails(const string& txt_filename, const string& csv_filename);
 private:

@@ -19,6 +19,7 @@ private:
 public:
     Library(const string& db_name);
     ~Library();
+    
     sqlite3* getDatabase() const;
     void addBook(const Book& book);
     void borrowBook(const BorrowedBook& borrowed_book);
